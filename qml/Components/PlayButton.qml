@@ -6,27 +6,23 @@ T.Button {
     id: control
     property string subText: ""
 
-    implicitHeight: contentItem.implicitHeight + 30
+    implicitHeight: contentItem.implicitHeight + 36
     implicitWidth: contentItem.implicitWidth + 30
 
-    background: BorderImage {
+    background: Rectangle {
         id: buttonBackground
-        source: "qrc:/Resources/green-button.png"
-        smooth: false
-        border {
-            left: 8
-            top: 8
-            right: 8
-            bottom: 8
+        radius: 12
+        border.width: 1
+        border.color: control.enabled ? "#a98bff" : "#4a3d80"
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: control.enabled ? "#8a63f2" : "#3a3066" }
+            GradientStop { position: 1.0; color: control.enabled ? "#5b3fc4" : "#2a2250" }
         }
-        horizontalTileMode: BorderImage.Stretch
-        verticalTileMode: BorderImage.Stretch
         Rectangle {
             id: backgroundOverlay
-            anchors.centerIn: parent
-            width: parent.width - 2 * 8
-            height: parent.height - 2 * 8
-            color: "#1f1"
+            anchors.fill: parent
+            radius: parent.radius
+            color: "#fff"
             opacity: 0
         }
         FocusBorder {

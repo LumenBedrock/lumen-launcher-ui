@@ -20,7 +20,7 @@ Window {
     property GoogleLoginHelper googleLoginHelper
     property GoogleVersionChannel playVerChannel
     property GooglePlayApi playApi
-    color: "#333333"
+    color: "#2a2250"
 
     ColumnLayout {
         id: layout

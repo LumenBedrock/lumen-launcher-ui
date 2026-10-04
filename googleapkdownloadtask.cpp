@@ -251,9 +251,11 @@ void GoogleApkDownloadTask::startDownload(playapi::proto::finsky::download::Andr
     progress->failed = false;
     auto cleanup = [this, progress]() {
         std::lock_guard<std::mutex> guard(progress->mtx);
-        if(!--progress->downloads) {
-            progress->failed = true;
-            m_active.store(false);
+        // Lumen: one failed part fails the whole download straight away (upstream kept
+        // the progress bar running until every other part had also finished).
+        progress->failed = true;
+        --progress->downloads;
+        if(m_active.exchange(false)) {
             emit activeChanged();
         }
     };

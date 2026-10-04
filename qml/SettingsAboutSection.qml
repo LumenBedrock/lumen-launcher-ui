@@ -13,7 +13,7 @@ ColumnLayout {
         Layout.preferredHeight: 80
         Layout.preferredWidth: 80
         Layout.alignment: Qt.AlignHCenter
-        source: "qrc:/Resources/mcpelauncher-icon.svg"
+        source: "qrc:/Resources/lumen-icon.svg"
     }
 
     Text {
@@ -21,7 +21,7 @@ ColumnLayout {
         font.pointSize: 12
         font.bold: true
         color: "#fff"
-        text: qsTr("Launcher")
+        text: qsTr("Lumen Launcher")
     }
 
     Text {
@@ -39,13 +39,10 @@ ColumnLayout {
         spacing: 25
         Repeater {
             model: [{
-                    "label": qsTr("Source"),
-                    "link": "https://github.com/minecraft-linux/mcpelauncher-manifest"
+                    "label": qsTr("Based on Minecraft Linux Launcher"),
+                    "link": "https://github.com/minecraft-linux/mcpelauncher-ui-manifest"
                 }, {
-                    "label": qsTr("Discord"),
-                    "link": "https://discord.gg/TaUNBXr"
-                }, {
-                    "label": qsTr("Docs"),
+                    "label": qsTr("Upstream docs"),
                     "link": "https://minecraft-linux.github.io"
                 }]
             delegate: Text {
@@ -66,7 +63,7 @@ ColumnLayout {
     HorizontalDivider {}
 
     Text {
-        text: qsTr("This project allows you to launch Minecraft: Bedrock Edition (as in the edition w/o the Edition suffix, previously known as Minecraft: Pocket Edition). The launcher supports Linux and OS X.<br/><br/> © Copyright 2018-2024, MrARM & contributors")
+        text: qsTr("This project allows you to launch Minecraft: Bedrock Edition (as in the edition w/o the Edition suffix, previously known as Minecraft: Pocket Edition). The launcher supports Linux and OS X.<br/><br/> © Copyright 2018-2024, MrARM & contributors<br/><br/>Lumen Launcher is a modified version of the Minecraft Linux Launcher (minecraft-linux, maintained by ChristopherHX and contributors), licensed under the GNU GPL v3. Original source: github.com/minecraft-linux/mcpelauncher-ui-manifest")
         color: "#fff"
         wrapMode: Text.WordWrap
         font.pointSize: 10

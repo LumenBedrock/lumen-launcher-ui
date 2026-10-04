@@ -12,7 +12,7 @@ ApplicationWindow {
     minimumWidth: 400
     minimumHeight: 300
     title: qsTr("Gamepad Tool")
-    color: "#333"
+    color: "#2a2250"
 
     property var currentGamepad: GamepadManager.gamepads.length > 0 ? GamepadManager.gamepads[0] : null
 
@@ -113,8 +113,8 @@ ApplicationWindow {
                     model: ["a", "b", "x", "y", "leftshoulder", "rightshoulder", "righttrigger", "lefttrigger", "back", "start", "leftstick", "rightstick", "guide", "dpleft", "dpdown", "dpright", "dpup", "leftx", "lefty", "rightx", "righty"]
                     Rectangle {
                         id: field
-                        color: "#222"
-                        border.color: "#444"
+                        color: "#1c1638"
+                        border.color: "#3b3068"
                         Layout.fillWidth: true
                         Layout.minimumHeight: 48
 
@@ -252,7 +252,7 @@ ApplicationWindow {
 
     footer: Rectangle {
         height: pbutton.height + 20
-        color: "#242424"
+        color: "#1c1638"
         MButton {
             id: pbutton
             anchors.right: parent.right

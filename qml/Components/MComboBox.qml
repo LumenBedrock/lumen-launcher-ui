@@ -12,8 +12,8 @@ T.ComboBox {
     opacity: control.enabled ? 1.0 : 0.3
 
     background: Rectangle {
-        border.color: control.hovered ? "#666" : "#555"
-        color: "#1e1e1e"
+        border.color: control.hovered ? "#666" : "#4a3d80"
+        color: "#16112e"
         FocusBorder {
             visible: control.visualFocus
         }
@@ -41,7 +41,7 @@ T.ComboBox {
         highlighted: control.highlightedIndex === index
         background: Rectangle {
             anchors.fill: parent
-            color: highlighted ? "#333" : "#1e1e1e"
+            color: highlighted ? "#2a2250" : "#16112e"
             radius: 2
 
             FocusBorder {
@@ -88,8 +88,8 @@ T.ComboBox {
         }
 
         background: Rectangle {
-            color: "#1e1e1e"
-            border.color: "#555"
+            color: "#16112e"
+            border.color: "#4a3d80"
             radius: 2
         }
 

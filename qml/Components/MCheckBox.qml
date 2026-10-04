@@ -13,8 +13,8 @@ T.CheckBox {
         implicitHeight: 18
         anchors.verticalCenter: parent.verticalCenter
         radius: 2
-        color: control.checked ? (control.hovered ? "#373" : "#383") : "#1e1e1e"
-        border.color: control.down ? "#888" : (control.hovered ? "#666" : "#555")
+        color: control.checked ? (control.hovered ? "#7a5af0" : "#6a4be0") : "#16112e"
+        border.color: control.down ? "#888" : (control.hovered ? "#666" : "#4a3d80")
 
         Canvas {
             anchors.centerIn: parent

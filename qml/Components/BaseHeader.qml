@@ -6,7 +6,7 @@ Rectangle {
     property string subtitle: ""
     property alias content: container.data
 
-    color: "#282828"
+    color: "#1b1536"
     Layout.fillWidth: true
     Layout.minimumHeight: contents.height
     z: 2

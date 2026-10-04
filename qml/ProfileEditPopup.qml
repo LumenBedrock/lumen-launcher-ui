@@ -23,7 +23,7 @@ Popup {
     focus: true
 
     background: Rectangle {
-        color: "#333"
+        color: "#2a2250"
     }
 
     Overlay.modal: Rectangle {
@@ -386,7 +386,7 @@ Popup {
                         verticalAlignment: Text.AlignTop
                     }
                     Rectangle {
-                        color: "#222"
+                        color: "#1c1638"
                         Layout.preferredHeight: 120
                         Layout.fillWidth: true
                         ListView {
@@ -403,7 +403,7 @@ Popup {
                                                   })
                             }
                             delegate: Rectangle {
-                                color: "#222"
+                                color: "#1c1638"
                                 width: parent.width
                                 height: keyField.implicitHeight
                                 MTextField {

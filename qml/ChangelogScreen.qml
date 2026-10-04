@@ -23,7 +23,7 @@ BaseScreen {
         TextEdit {
             padding: 15
             textFormat: TextEdit.RichText
-            text: "<b>Welcome to the new Minecraft Linux Launcher Update</b><br/><br/>" + LAUNCHER_CHANGE_LOG
+            text: "<b>Welcome to Lumen Launcher</b><br/><br/>" + LAUNCHER_CHANGE_LOG
             color: "#fff"
             readOnly: true
             font.pointSize: 10
@@ -35,7 +35,7 @@ BaseScreen {
     Rectangle {
         Layout.fillWidth: true
         Layout.minimumHeight: pbutton.height + 10 * 2
-        color: "#242424"
+        color: "#1c1638"
         MButton {
             id: pbutton
             text: qsTr("Continue")

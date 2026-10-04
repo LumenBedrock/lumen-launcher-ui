@@ -8,10 +8,13 @@ import io.mrarm.mcpelauncher 1.0
 Window {
     id: window
     visible: true
-    width: 640
-    height: 480
-    title: qsTr("Linux Minecraft Launcher")
-    color: "#333333"
+    // resizable popup window (opens at 860x560)
+    width: 860
+    height: 560
+    minimumWidth: 640
+    minimumHeight: 440
+    title: qsTr("Lumen Launcher")
+    color: "#2a2250"
     property bool hasUpdate: false
     property bool hasAskedForKey: false
     property string updateDownloadUrl: ""

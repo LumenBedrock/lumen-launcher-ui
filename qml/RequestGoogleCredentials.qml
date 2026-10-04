@@ -11,7 +11,7 @@ Window {
     width: 640
     height: 480
     title: qsTr("Request Google Credentials")
-    color: "#333333"
+    color: "#2a2250"
     property bool hasUpdate: false
     property bool hasAskedForKey: false
     property string updateDownloadUrl: ""

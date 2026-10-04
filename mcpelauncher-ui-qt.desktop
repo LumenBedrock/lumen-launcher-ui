@@ -1,8 +1,9 @@
 [Desktop Entry]
-Name=Minecraft Bedrock Launcher
+Name=Lumen Launcher
 Comment=A Minecraft: Bedrock Edition (earlier: Pocket Edition launcher)
-Exec=mcpelauncher-ui-qt %U
-Icon=mcpelauncher-ui-qt
+Exec=lumen-launcher %U
+Icon=lumen-launcher
+StartupWMClass=lumen-launcher
 MimeType=application/zip
 Type=Application
 Categories=Game;

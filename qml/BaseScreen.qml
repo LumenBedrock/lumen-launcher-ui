@@ -12,11 +12,13 @@ ColumnLayout {
     spacing: 0
 
     property alias headerContent: baseHeader.content
+    property bool showHeader: true
 
     BaseHeader {
         id: baseHeader
+        visible: rowLayout.showHeader
         Layout.fillWidth: true
-        title: qsTr("Unofficial *nix launcher for Minecraft")
-        subtitle: LAUNCHER_VERSION_NAME ? qsTr("%1 (build %2)").arg(LAUNCHER_VERSION_NAME).arg((LAUNCHER_VERSION_CODE || "Unknown").toString()) : ""
+        title: qsTr("Lumen Launcher")
+        subtitle: LAUNCHER_VERSION_NAME ? qsTr("Version %1").arg(LAUNCHER_VERSION_NAME) : ""
     }
 }

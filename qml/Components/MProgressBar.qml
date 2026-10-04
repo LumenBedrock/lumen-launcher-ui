@@ -8,14 +8,14 @@ T.ProgressBar {
 
     background: Rectangle {
         anchors.fill: parent
-        color: "#1e1e1e"
+        color: "#16112e"
     }
 
     contentItem: Item {
         Rectangle {
             width: parent.width * control.visualPosition
             height: parent.height
-            color: "#008643"
+            color: "#e8b84a"
             visible: !control.indeterminate
         }
 
@@ -25,7 +25,7 @@ T.ProgressBar {
             visible: control.indeterminate
             Rectangle {
                 id: bar
-                color: "#008643"
+                color: "#e8b84a"
                 height: parent.height
                 NumberAnimation on x {
                     from: -control.width / 8
