@@ -321,7 +321,7 @@ AnimatedStackLayout {
                         onClicked: downloads.currentIndex = index
                         highlighted: ListView.isCurrentItem
                         background: Rectangle {
-                            color: control.highlighted ? "#226322" : (control.down ? "#338833" : (control.hovered ? "#222" : "transparent"))
+                            color: control.highlighted ? "#5b3fc4" : (control.down ? "#7a5af0" : (control.hovered ? "#1c1638" : "transparent"))
                         }
                     }
                     highlightResizeVelocity: -1

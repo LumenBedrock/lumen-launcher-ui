@@ -1,4 +1,5 @@
 #include "gamelauncher.h"
+#include <mcpelauncher/path_helper.h>
 #include "profilemanager.h"
 #include "EnvPathUtil.h"
 #include <QFile>
@@ -43,10 +44,10 @@ void GameLauncher::start(bool disableGameLog, QString arch, bool hasVerifiedLice
         args.append("--free-only");
     }
     if (m_profile != nullptr) {
-        if (m_profile->dataDirCustom) {
-            args.append("-dd");
-            args.append(m_profile->dataDir);
-        }
+        // Lumen: always tell the client where its data folder is (default ~/Lumen), so the game
+        // never falls back to the flatpak's private folder.
+        args.append("-dd");
+        args.append(m_profile->dataDirCustom ? m_profile->dataDir : QDir(QString::fromStdString(PathHelper::getPrimaryDataDirectory())).canonicalPath());
         if (m_profile->windowCustomSize) {
             args.append("-ww");
             args.append(QString::number(m_profile->windowWidth));

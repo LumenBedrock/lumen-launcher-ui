@@ -15,7 +15,7 @@ Window {
     flags: Qt.Dialog
     title: "Minecraft .apk import"
     visible: apkImportHelper.extractingApk
-    color: "#333"
+    color: "#2a2250"
 
     property bool allowIncompatible: false
 

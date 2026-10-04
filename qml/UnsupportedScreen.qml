@@ -36,7 +36,7 @@ BaseScreen {
         Layout.fillWidth: true
         Layout.minimumHeight: pbutton.height + 10 * 2
 
-        color: "#242424"
+        color: "#1c1638"
 
         MButton {
             id: pbutton

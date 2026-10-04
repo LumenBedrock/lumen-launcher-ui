@@ -17,6 +17,9 @@
         <file>qml/ErrorScreen.qml</file>
         <file>qml/UnlockScreen.qml</file>
         <file>qml/HomeScreen.qml</file>
+        <file>qml/VersionsScreen.qml</file>
+        <file>qml/ServersScreen.qml</file>
+        <file>qml/PackEditor.qml</file>
         <file>qml/NewsScreen.qml</file>
         <file>qml/ModsScreen.qml</file>
         <file>qml/GameLogScreen.qml</file>
@@ -49,6 +52,14 @@
         <file>Resources/green-button.png</file>
         <file>Resources/artwork0.png</file>
         <file>Resources/check.png</file>
+        <file>Resources/lumen-icon.svg</file>
+        <file>Resources/lumen-star.svg</file>
+        <file>Resources/lumen-nav-home.svg</file>
+        <file>Resources/lumen-nav-log.svg</file>
+        <file>Resources/lumen-nav-settings.svg</file>
+        <file>Resources/lumen-nav-lumen.svg</file>
+        <file>Resources/lumen-nav-versions.svg</file>
+        <file>Resources/lumen-nav-servers.svg</file>
         <file>Resources/noise.png</file>
         <file>Resources/icon-edit.png</file>
         <file>Resources/icon-exit.png</file>

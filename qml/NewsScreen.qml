@@ -48,7 +48,7 @@ ColumnLayout {
                     Layout.fillHeight: true
                     Layout.columnSpan: articleImage.ratio > 1.5 ? 2 : 1
                     Layout.rowSpan: articleImage.ratio < 0.5 ? 2 : 1
-                    color: "#222"
+                    color: "#1c1638"
 
                     Image {
                         id: articleImage
@@ -66,7 +66,7 @@ ColumnLayout {
                         width: parent.width
                         height: descriptionContent.height
                         anchors.bottom: parent.bottom
-                        color: "#111"
+                        color: "#0d0a1c"
                         Column {
                             id: descriptionContent
                             width: parent.width

@@ -55,7 +55,7 @@ MComboBox {
             id: separator
             width: parent.width
             height: 1
-            color: "#444"
+            color: "#3b3068"
             visible: hasSeparator
             radius: 2
         }
@@ -73,7 +73,7 @@ MComboBox {
 
         background: Rectangle {
             anchors.fill: parent
-            color: highlighted ? "#283" : (parent.hovered ? "#333" : "#1e1e1e")
+            color: highlighted ? "#5b3fc4" : (parent.hovered ? "#2a2250" : "#16112e")
         }
     }
 

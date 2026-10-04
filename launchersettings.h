@@ -54,7 +54,8 @@ public:
     bool showExitButton() const { return settings.value("showExitButton", false).toBool(); }
     void setShowExitButton(bool value) { settings.setValue("showExitButton", value); emit settingsChanged(); }
 
-    bool showUnverified() const { return !disableDevMode && settings.value("showUnverified", false).toBool(); }
+    // Lumen: always list newer (not yet verified / beta) game versions, Lumen targets the newest builds
+    bool showUnverified() const { return true; }
     void setShowUnverified(bool value) { settings.setValue("showUnverified", value); emit settingsChanged(); }
 
     bool showUnsupported() const { return !disableDevMode && !singleArch().isEmpty(); }
@@ -66,7 +67,7 @@ public:
     QString singleArch() const { return !disableDevMode ? settings.value("singleArch", "").toString() : ""; }
     void setSingleArch(QString value) { settings.setValue("singleArch", value); emit settingsChanged(); }
 
-    bool showBetaVersions() const { return !disableDevMode; }
+    bool showBetaVersions() const { return true; }
     void setShowBetaVersions(bool value) { emit settingsChanged(); }
 
     long long lastVersion() const { return settings.value("lastVersion", 0).toLongLong(); }
@@ -80,12 +81,10 @@ public:
     }
 
     QString versionsFeedBaseUrl() const {
-        if(disableDevMode) {
-            return "";
-        }
-        auto val = settings.value("versionsFeedBaseUrl", "").toString();
+        // Lumen: the master version list also has the newest game versions (the stable branch stops at 1.21.114.1)
+        auto val = disableDevMode ? QString() : settings.value("versionsFeedBaseUrl", "").toString();
         if(val.isEmpty()) {
-            return showUnverified() ? "https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/master" : "";
+            return "https://raw.githubusercontent.com/minecraft-linux/mcpelauncher-versiondb/master";
         }
         return val;
     }

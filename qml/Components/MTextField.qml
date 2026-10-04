@@ -15,8 +15,8 @@ TextField {
     opacity: control.enabled ? 1.0 : 0.3
 
     background: Rectangle {
-        border.color: control.hovered ? "#666" : "#555"
-        color: "#1e1e1e"
+        border.color: control.hovered ? "#666" : "#4a3d80"
+        color: "#16112e"
         radius: 2
 
         FocusBorder {

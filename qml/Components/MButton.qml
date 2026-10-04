@@ -10,8 +10,8 @@ T.Button {
 
     background: Rectangle {
         anchors.fill: parent
-        border.color: control.down ? "#888" : (control.hovered ? "#666" : "#555")
-        color: control.down ? "#333" : "#1e1e1e"
+        border.color: control.down ? "#888" : (control.hovered ? "#666" : "#4a3d80")
+        color: control.down ? "#2a2250" : "#16112e"
         radius: 2
         FocusBorder {
             visible: control.visualFocus

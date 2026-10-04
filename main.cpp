@@ -16,6 +16,8 @@
 #include "troubleshooter.h"
 #include "updatechecker.h"
 #include "modmanager.h"
+#include "lumenconfig.h"
+#include "lumenprofiles.h"
 #include "zipextractiontask.h"
 #include "downloadtask.h"
 
@@ -29,6 +31,10 @@
 #include "gamepad.h"
 #ifdef LAUNCHER_ENABLE_GLFW
 #include <QTimer>
+#include <QQuickWindow>
+#include <QMouseEvent>
+#include <QProcess>
+#include <QIcon>
 #include <QKeyEvent>
 #include <QWindow>
 #include <GLFW/glfw3.h>
@@ -65,6 +71,8 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("Minecraft Linux Launcher UI");
 
     LauncherApp app(argc, argv);
+    app.setWindowIcon(QIcon(":/Resources/lumen-icon.svg"));
+    QGuiApplication::setDesktopFileName("lumen-launcher");
     QTranslator translator;
     if (translator.load(QLocale(), QLatin1String("mcpelauncher"), QLatin1String("_"), QLatin1String(":/translations"))) {
         app.installTranslator(&translator);
@@ -76,7 +84,7 @@ int main(int argc, char *argv[])
 #endif
 
     QCommandLineParser parser;
-    parser.setApplicationDescription("Minecraft Linux Launcher UI");
+    parser.setApplicationDescription("Lumen Launcher");
     parser.addPositionalArgument("file", "file or uri to open with the default profile");
     parser.addHelpOption();
     QCommandLineOption devmodeOption(QStringList() << "d" << "enable-devmode", 
@@ -109,7 +117,11 @@ int main(int argc, char *argv[])
 
     auto verbose = parser.isSet(verboseOption);
 
-    if(!verbose) {
+    if(qEnvironmentVariableIsSet("LUMEN_DEBUG")) {
+        qInstallMessageHandler([](QtMsgType, const QMessageLogContext &, const QString &msg) {
+            fprintf(stderr, "%s\n", msg.toLocal8Bit().constData());
+        });
+    } else if(!verbose) {
         // Silence console
         qInstallMessageHandler([](QtMsgType type, const QMessageLogContext &context, const QString &msg) {});
     }
@@ -140,6 +152,8 @@ int main(int argc, char *argv[])
     });
     qRegisterMetaType<ModInfo>("ModInfo");
     qmlRegisterType<ModManager>("io.mrarm.mcpelauncher", 1, 0, "ModManager");
+    qmlRegisterType<LumenConfig>("io.mrarm.mcpelauncher", 1, 0, "LumenConfig");
+    qmlRegisterType<LumenProfiles>("io.mrarm.mcpelauncher", 1, 0, "LumenProfiles");
     qmlRegisterType<ZipExtractionTask>("io.mrarm.mcpelauncher", 1, 0, "ZipExtractionTask");
     qmlRegisterType<DownloadTask>("io.mrarm.mcpelauncher", 1, 0, "DownloadTask");
     qmlRegisterType<DownloadDataWrapper>("io.mrarm.mcpelauncher", 1, 0, "DownloadDataWrapper");
@@ -178,7 +192,7 @@ int main(int argc, char *argv[])
 #ifdef LAUNCHER_CHANGE_LOG
     engine.rootContext()->setContextProperty("LAUNCHER_CHANGE_LOG", QVariant(QString(LAUNCHER_CHANGE_LOG) + "\n" + license.replace("\n", "<br/>")));
 #else
-    engine.rootContext()->setContextProperty("LAUNCHER_CHANGE_LOG", QVariant(license.replace("\n", "<br/>")));
+    engine.rootContext()->setContextProperty("LAUNCHER_CHANGE_LOG", QVariant(QString("Lumen Launcher is a modified version of the Minecraft Linux Launcher (minecraft-linux, maintained by ChristopherHX and contributors) and is free software under the GNU GPL v3. Source: github.com/minecraft-linux/mcpelauncher-ui-manifest<br/><br/>The game engine comes from the flatpak io.mrarm.mcpelauncher; Lumen keeps your game, worlds and settings in ~/Lumen.<br/><br/>") + license.replace("\n", "<br/>")));
 #endif
 #ifdef LAUNCHER_ENABLE_GOOGLE_PLAY_LICENCE_CHECK
     engine.rootContext()->setContextProperty("LAUNCHER_ENABLE_GOOGLE_PLAY_LICENCE_CHECK", QVariant(true));
@@ -195,7 +209,45 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty("SOURCE_MOD", QVariant(parser.isSet(modOption) ? parser.value(modOption) : ""));
     engine.rootContext()->setContextProperty("SAFE_MODE", QVariant(isSafeMode));
 
+    // Test hooks (headless screenshots): LUMEN_START_PAGE=<sidebar index>, LUMEN_SCREENSHOT=<png path>
+    engine.rootContext()->setContextProperty("LUMEN_START_PAGE", qEnvironmentVariableIntValue("LUMEN_START_PAGE", nullptr) );
+    engine.rootContext()->setContextProperty("LUMEN_START_SET", qEnvironmentVariableIsSet("LUMEN_START_PAGE"));
     engine.load(QUrl(parser.isSet(requestGoogleCredentialsOption) ? QStringLiteral("qrc:/qml/RequestGoogleCredentials.qml") : QStringLiteral("qrc:/qml/main.qml")));
+    if (!engine.rootObjects().isEmpty() && qEnvironmentVariableIsSet("LUMEN_TEST_DRAG")) {
+        // headless test: LUMEN_TEST_DRAG="x1,y1,x2,y2" presses at (x1,y1), drags to (x2,y2) and releases
+        QTimer::singleShot(7500, &app, [&engine]() {
+            auto *w = qobject_cast<QQuickWindow *>(engine.rootObjects().first());
+            auto parts = qEnvironmentVariable("LUMEN_TEST_DRAG").split(',');
+            if (!w || parts.size() != 4)
+                return;
+            QPointF a(parts[0].toDouble(), parts[1].toDouble()), b(parts[2].toDouble(), parts[3].toDouble());
+            auto send = [w](QEvent::Type t, QPointF p, Qt::MouseButton btn, Qt::MouseButtons btns) {
+                QMouseEvent ev(t, p, w->mapToGlobal(p), btn, btns, Qt::NoModifier);
+                QCoreApplication::sendEvent(w, &ev);
+            };
+            send(QEvent::MouseMove, a, Qt::NoButton, Qt::NoButton);
+            send(QEvent::MouseButtonPress, a, Qt::LeftButton, Qt::LeftButton);
+            for (int i = 1; i <= 10; i++)
+                send(QEvent::MouseMove, a + (b - a) * (i / 10.0), Qt::NoButton, Qt::LeftButton);
+            send(QEvent::MouseButtonRelease, b, Qt::LeftButton, Qt::NoButton);
+        });
+    }
+    if (!engine.rootObjects().isEmpty() && qEnvironmentVariableIsSet("LUMEN_SCREENSHOT")) {
+        QTimer::singleShot(qEnvironmentVariableIntValue("LUMEN_SCREENSHOT_MS") > 0 ? qEnvironmentVariableIntValue("LUMEN_SCREENSHOT_MS") : 6000, &app, [&engine, &app]() {
+            if (auto *w = qobject_cast<QQuickWindow *>(engine.rootObjects().first()))
+                w->grabWindow().save(qEnvironmentVariable("LUMEN_SCREENSHOT"));
+            app.quit();
+        });
+    }
+    if (!engine.rootObjects().isEmpty() && qEnvironmentVariableIsSet("HYPRLAND_INSTANCE_SIGNATURE")) {
+        // Keep the window floating (it is no longer fixed-size, so a tiling WM would tile it) and centred.
+        QTimer::singleShot(350, []() {
+            QProcess::startDetached("sh", QStringList() << "-c" <<
+                "hyprctl dispatch \"hl.dsp.window.float({action='enable', window='title:^Lumen Launcher$'})\" >/dev/null 2>&1; "
+                "hyprctl dispatch \"hl.dsp.window.center({window='title:^Lumen Launcher$'})\" >/dev/null 2>&1 || "
+                "(hyprctl dispatch focuswindow 'title:^Lumen Launcher$' && hyprctl dispatch setfloating && hyprctl dispatch centerwindow) >/dev/null 2>&1");
+        });
+    }
     if (engine.rootObjects().isEmpty())
         return -1;
 

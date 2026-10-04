@@ -11,9 +11,15 @@ T.Button {
     implicitWidth: implicitContentWidth
 
     background: Item {
+        Rectangle { // soft pill behind the active / hovered item
+            anchors.fill: parent
+            anchors.margins: 4
+            radius: 8
+            color: control.checked ? "#2d2459" : (control.hovered ? "#211a47" : "transparent")
+        }
         Rectangle {
             id: indicatorBar
-            color: "#eee"
+            color: "#e8b84a"
             width: 3
             height: 0
             anchors.verticalCenter: parent.verticalCenter
@@ -30,9 +36,12 @@ T.Button {
 
         Image {
             id: icon
-            width: 30
+            Layout.preferredWidth: 28
+            Layout.preferredHeight: 28
             source: iconSource
-            smooth: false
+            smooth: true
+            sourceSize.width: 60
+            sourceSize.height: 60
             fillMode: Image.PreserveAspectFit
             Layout.leftMargin: 18
             Layout.rightMargin: 18

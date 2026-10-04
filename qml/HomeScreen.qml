@@ -9,6 +9,7 @@ import io.mrarm.mcpelauncher 1.0
 
 BaseScreen {
     id: playScreen
+    showHeader: false // the sidebar already says Lumen
 
     property GoogleLoginHelper googleLoginHelper
     property VersionManager versionManager
@@ -28,13 +29,6 @@ BaseScreen {
     property bool activeVersionNeedsDownload: needsDownload()
     property bool activeVersionSupported: checkSupport()
 
-    headerContent: TabBar {
-        background: null
-        MTabButton {
-            text: qsTr("Play")
-        }
-    }
-
     ModManager {
         id: modManager
     }
@@ -47,6 +41,36 @@ BaseScreen {
         smooth: sourceSize.height > 256
         fillMode: Image.PreserveAspectCrop
 
+        Rectangle { // Lumen hero backdrop, shown when no custom wallpaper is set
+            anchors.fill: parent
+            visible: backgroundArt.status !== Image.Ready
+            gradient: Gradient {
+                GradientStop { position: 0.0; color: "#241a52" }
+                GradientStop { position: 0.6; color: "#140f2e" }
+                GradientStop { position: 1.0; color: "#0d0a1c" }
+            }
+            Column {
+                anchors.centerIn: parent
+                anchors.verticalCenterOffset: -parent.height * 0.2
+                spacing: 8
+                Image {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    source: "qrc:/Resources/lumen-star.svg"
+                    sourceSize.width: 360
+                    sourceSize.height: 360
+                    width: Math.min(backgroundArt.height * 0.26, 180)
+                    height: width
+                }
+                Text {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: qsTr("Welcome to Lumen")
+                    color: "#f3e6bf"
+                    font.pointSize: 20
+                    font.bold: true
+                }
+            }
+        }
+
         FolderListModel {
             id: wallpaperFolderModel
             nameFilters: ["*.jpg", "*.jpeg", "*.png"]
@@ -56,7 +80,7 @@ BaseScreen {
             function getRandomImage() {
                 if (count > 0)
                     return "file://" + get(Math.random() * count, "filePath")
-                return "qrc:/Resources/artwork0.png"
+                return ""
             }
         }
 
@@ -170,7 +194,7 @@ BaseScreen {
                 }
 
                 NotifyBanner {
-                    color: "#444"
+                    color: "#3b3068"
                     title: qsTr("Unconfigured Joysticks Found")
                     description: {
                         const ret = GamepadManager.gamepads.filter(gamepad => !gamepad.hasMapping).map(gamepad => gamepad.name)
@@ -179,12 +203,12 @@ BaseScreen {
                         return qsTr("%1 Joysticks cannot be used as Gamepad Input:\n%2.").arg(ret.length).arg(ret.join(", "))
                     }
                     actionText: "Configure"
-                    visible: GamepadManager.gamepads.some(gamepad => !gamepad.hasMapping) && launcherSettings.showNotifications
+                    visible: false // Lumen: gamepad-mapping banner hidden
                     onClicked: gamepadTool.show()
                 }
 
                 NotifyBanner {
-                    color: "#652"
+                    color: "#6b4fd0"
                     visible: launcherSettings.trialMode && launcherSettings.showNotifications
                     dismissible: false
                     title: qsTr("Trial Mode Enabled")
@@ -318,9 +342,50 @@ BaseScreen {
                     }
                 }
 
+                // Lumen: new launcher release on GitHub (silent if offline or the repo has no release yet)
+                NotifyBanner {
+                    id: lumenUpdateBanner
+                    property string releaseUrl: ""
+                    color: "#5b3fc4"
+                    dismissible: true
+                    title: qsTr("Lumen Launcher update available")
+                    actionText: qsTr("Download")
+                    visible: false
+                    onClicked: Qt.openUrlExternally(releaseUrl)
+
+                    Component.onCompleted: {
+                        if (!launcherSettings.checkForUpdates || !launcherSettings.showNotifications)
+                            return
+                        var xhr = new XMLHttpRequest()
+                        xhr.onreadystatechange = function () {
+                            if (xhr.readyState !== XMLHttpRequest.DONE || xhr.status !== 200)
+                                return
+                            try {
+                                var rel = JSON.parse(xhr.responseText)
+                                var latest = String(rel.tag_name || "").replace(/^v/, "")
+                                var cur = String(LAUNCHER_VERSION_NAME)
+                                var a = latest.split(".").map(Number), b = cur.split(".").map(Number)
+                                var newer = false
+                                for (var i = 0; i < Math.max(a.length, b.length); i++) {
+                                    var x = a[i] || 0, y = b[i] || 0
+                                    if (x !== y) { newer = x > y; break }
+                                }
+                                if (latest && newer) {
+                                    lumenUpdateBanner.description = qsTr("Version %1 is out (you have %2). Download the new AppImage; your game, worlds and settings in ~/Lumen are kept.").arg(latest).arg(cur)
+                                    lumenUpdateBanner.releaseUrl = rel.html_url || "https://github.com/LumenBedrock/lumen-launcher/releases"
+                                    lumenUpdateBanner.visible = true
+                                }
+                            } catch (e) {
+                            }
+                        }
+                        xhr.open("GET", "https://api.github.com/repos/LumenBedrock/lumen-launcher/releases/latest")
+                        xhr.send()
+                    }
+                }
+
                 NotifyBanner {
                     id: banner
-                    color: "#382"
+                    color: "#4a3d80"
                     dismissible: true
                     title: qsTr("Update")
                     visible: false
@@ -374,12 +439,10 @@ BaseScreen {
         }
     }
 
-    ProfileEditPopup {
-        id: profileEditPopup
-        onAboutToHide: profileComboBox.onAddProfileResult(profileEditPopup.profile)
-        versionManager: playScreen.versionManager
-        profileManager: playScreen.profileManager
-        playVerChannel: playScreen.playVerChannel
+    Component.onCompleted: {
+        window.currentGameDataDir = Qt.binding(function () {
+            return (profileManager.activeProfile && profileManager.activeProfile.dataDirCustom) ? QmlUrlUtils.localFileToUrl(profileManager.activeProfile.dataDir) : ""
+        })
     }
 
 // Extra Version Code
@@ -438,63 +501,14 @@ BaseScreen {
 /////
 
     Rectangle {
-        color: '#282828'
+        color: "#1b1536"
         Layout.fillWidth: true
         height: 66
 
-        RowLayout {
-            spacing: -1
-            anchors.verticalCenter: parent.verticalCenter
-            height: 44
-            x: 10
-
-            ProfileComboBox {
-                id: profileComboBox
-                property bool loaded: false
-                Layout.preferredWidth: 170
-                Layout.fillHeight: true
-                onAddProfileSelected: {
-                    profileEditPopup.reset()
-                    profileEditPopup.open()
-                }
-                Component.onCompleted: {
-                    setProfile(profileManager.activeProfile)
-                    window.currentGameDataDir = Qt.binding(function () {
-                        return (profileManager.activeProfile && profileManager.activeProfile.dataDirCustom) ? QmlUrlUtils.localFileToUrl(profileManager.activeProfile.dataDir) : ""
-                    })
-                    loaded = true
-                }
-                onCurrentProfileChanged: {
-                    if (loaded && currentProfile !== null) {
-                        profileManager.activeProfile = currentProfile
-                    }
-                }
-                enabled: !(progressbarVisible || gameLauncher.running || googleLoginHelper.account === null)
-            }
-
-            MButton {
-                Layout.preferredHeight: parent.height
-                Layout.preferredWidth: parent.height
-                z: hovered ? 1 : -1
-                enabled: profileComboBox.enabled
-                onClicked: {
-                    profileEditPopup.setProfile(profileComboBox.getProfile())
-                    profileEditPopup.open()
-                }
-                Image {
-                    anchors.centerIn: parent
-                    source: "qrc:/Resources/icon-edit.svg"
-                    height: 24
-                    width: 24
-                    opacity: enabled ? 1.0 : 0.3
-                }
-            }
-        }
-
         PlayButton {
             id: pbutton
-            x: parent.width > 700 ? (parent.width - width) / 2 : (parent.width - width - 12)
-            y: 54 - height
+            x: (parent.width - width) / 2
+            y: -height - 28
             width: Math.min(Math.max(Math.max(implicitWidth, 230), playScreen.width / 4), 320)
             Layout.alignment: Qt.AlignHCenter
             text: {
@@ -505,7 +519,7 @@ BaseScreen {
             subText: {
                 if (playScreen.statusChecking)
                     return ""
-                return playScreen.activeVersionName ? ("Minecraft " + playScreen.activeVersionName) : qsTr("Unknown")
+                return playScreen.activeVersionName ? ("Minecraft " + playScreen.activeVersionName).replace(/\s*\(x86(_64)?\)/i, "") : qsTr("Unknown")
             }
             enabled: !(gameLauncher.running || playScreen.statusChecking || progressbarVisible || updateChecker.active || !playScreen.activeVersionSupported || !playScreen.activeVersionName || playStatusNotify.visible)
             onClicked: {
