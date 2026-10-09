@@ -22,7 +22,7 @@ set(UPDATE_CHECK_BUILD_ID "" CACHE STRING "Specify the numeral version number fo
 set(LAUNCHER_VERSIONDB_URL "" CACHE STRING "Specify the remote url of the versiondb to use")
 set(LAUNCHER_VERSIONDB_PATH "" CACHE STRING "Specify a local versiondb checkout to embed into this binary")
 set(LAUNCHER_CHANGE_LOG "" CACHE STRING "Specify the changelog to show after update")
-set(LAUNCHER_VERSION_NAME "1.0.2" CACHE STRING "Specify the version name shown in settings")
+set(LAUNCHER_VERSION_NAME "1.0.3" CACHE STRING "Specify the version name shown in settings")
 set(LAUNCHER_VERSION_CODE "3" CACHE STRING "Specify the version code (integer) shown in settings")
 set(LAUNCHER_FLATPAK_CONFIG_URL "" CACHE STRING "Specify the url to the flatpak config to compare the current version")
 set(LAUNCHER_VERSION_COMPAT "" CACHE STRING "Specify Minecraft extraVersion compat level")
