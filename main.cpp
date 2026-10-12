@@ -17,6 +17,7 @@
 #include "updatechecker.h"
 #include "modmanager.h"
 #include "lumenconfig.h"
+#include "lumenupdater.h"
 #include "lumenprofiles.h"
 #include "zipextractiontask.h"
 #include "downloadtask.h"
@@ -153,6 +154,7 @@ int main(int argc, char *argv[])
     qRegisterMetaType<ModInfo>("ModInfo");
     qmlRegisterType<ModManager>("io.mrarm.mcpelauncher", 1, 0, "ModManager");
     qmlRegisterType<LumenConfig>("io.mrarm.mcpelauncher", 1, 0, "LumenConfig");
+    qmlRegisterType<LumenUpdater>("io.mrarm.mcpelauncher", 1, 0, "LumenUpdater");
     qmlRegisterType<LumenProfiles>("io.mrarm.mcpelauncher", 1, 0, "LumenProfiles");
     qmlRegisterType<ZipExtractionTask>("io.mrarm.mcpelauncher", 1, 0, "ZipExtractionTask");
     qmlRegisterType<DownloadTask>("io.mrarm.mcpelauncher", 1, 0, "DownloadTask");

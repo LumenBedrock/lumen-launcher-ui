@@ -346,12 +346,17 @@ BaseScreen {
                 NotifyBanner {
                     id: lumenUpdateBanner
                     property string releaseUrl: ""
-                    color: "#5b3fc4"
-                    dismissible: true
-                    title: qsTr("Lumen Launcher update available")
-                    actionText: qsTr("Download")
+                    property string assetUrl: ""
+                    property string latestVersion: ""
+                    color: updater.error ? "#a33" : "#5b3fc4"
+                    dismissible: !updater.running
+                    title: updater.done ? qsTr("Lumen Launcher updated") : updater.error ? qsTr("Update failed") : updater.running ? qsTr("Updating Lumen Launcher...") : qsTr("Lumen Launcher update available")
+                    description: updater.error ? updater.error : (updater.running || updater.done) ? updater.status : qsTr("Version %1 is out (you have %2). One click updates it; your game, worlds and settings in ~/Lumen are kept.").arg(latestVersion).arg(LAUNCHER_VERSION_NAME)
+                    actionText: updater.running ? "" : updater.done ? qsTr("Restart") : updater.error ? qsTr("Retry") : qsTr("Update now")
                     visible: false
-                    onClicked: Qt.openUrlExternally(releaseUrl)
+                    onClicked: updater.done ? updater.restart() : updater.start(assetUrl)
+
+                    LumenUpdater { id: updater }
 
                     Component.onCompleted: {
                         if (!launcherSettings.checkForUpdates || !launcherSettings.showNotifications)
@@ -371,7 +376,11 @@ BaseScreen {
                                     if (x !== y) { newer = x > y; break }
                                 }
                                 if (latest && newer) {
-                                    lumenUpdateBanner.description = qsTr("Version %1 is out (you have %2). Download the new AppImage; your game, worlds and settings in ~/Lumen are kept.").arg(latest).arg(cur)
+                                    lumenUpdateBanner.latestVersion = latest
+                                    var assets = rel.assets || []
+                                    for (var k = 0; k < assets.length; k++)
+                                        if (String(assets[k].name).toLowerCase().endsWith(".appimage"))
+                                            lumenUpdateBanner.assetUrl = assets[k].browser_download_url
                                     lumenUpdateBanner.releaseUrl = rel.html_url || "https://github.com/LumenBedrock/lumen-launcher/releases"
                                     lumenUpdateBanner.visible = true
                                 }
@@ -381,6 +390,13 @@ BaseScreen {
                         xhr.open("GET", "https://api.github.com/repos/LumenBedrock/lumen-launcher/releases/latest")
                         xhr.send()
                     }
+                }
+
+                ProgressBar {
+                    width: parent.width
+                    visible: lumenUpdateBanner.visible && updater.running
+                    indeterminate: updater.progress < 0
+                    value: updater.progress
                 }
 
                 NotifyBanner {
