@@ -11,6 +11,7 @@ ColumnLayout {
     // Which dropdowns are open, kept here because every edit rebuilds the cards
     property var openState: ({})
     signal joinRequested(string uri)
+    property bool joinAllowed: true // false while no Google account is signed in
     Component.onCompleted: { // headless test hook: open the first server's dropdowns
         if (LUMEN_START_SET && store.profiles.length > 0) {
             var n = store.profiles[0].name
@@ -191,7 +192,8 @@ ColumnLayout {
                         RowLayout {
                             Layout.fillWidth: true
                             MButton {
-                                text: qsTr("Join")
+                                text: page.joinAllowed ? qsTr("Join") : qsTr("Sign in to join")
+                                enabled: page.joinAllowed && !page.locked
                                 onClicked: { var u = store.joinUri(card.modelData.name); if (u) page.joinRequested(u) }
                             }
                             Item { Layout.fillWidth: true }

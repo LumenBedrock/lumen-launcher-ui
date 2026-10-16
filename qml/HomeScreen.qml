@@ -20,6 +20,8 @@ BaseScreen {
     property bool isVersionsInitialized: false
     property bool progressbarVisible: playDownloadTask.active || apkExtractionTask.active || updateManager.active
     property bool hasUpdate: false
+    // quick join needs a signed-in Google account (or stored credentials)
+    readonly property bool loggedIn: googleLoginHelper != null && (googleLoginHelper.account != null || googleLoginHelper.hasEncryptedCredentials)
     property string updateDownloadUrl: ""
     property string warnMessage: ""
     property string warnUrl: ""
@@ -79,7 +81,7 @@ BaseScreen {
         Component {
             id: heroSun
             HeroSun {
-                playText: playScreen.playText; playSubText: playScreen.playSubText; playEnabled: playScreen.playEnabled
+                playText: playScreen.playText; playSubText: playScreen.playSubText; playEnabled: playScreen.playEnabled; joinEnabled: playScreen.playEnabled && playScreen.loggedIn
                 modules: playScreen.lumenModules; servers: playScreen.lumenServers; versionName: playScreen.shortVersionName
                 onPlayClicked: playScreen.play()
                 onJoinServer: function (server) { playScreen.play(server) }
@@ -575,6 +577,8 @@ BaseScreen {
         playUri(server ? "minecraft://connect/?serverUrl=" + encodeURIComponent(server.host) + "&serverPort=" + server.port : "")
     }
     function playUri(uri) {
+        if (uri !== "" && !loggedIn)
+            return
         gameLauncher.uri = uri
         if (playScreen.activeVersionNeedsDownload) {
             playDownloadTask.versionCode = getDownloadVersionCode()

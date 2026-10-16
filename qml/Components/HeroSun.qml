@@ -6,6 +6,7 @@ Item {
     property string playText
     property string playSubText
     property bool playEnabled
+    property bool joinEnabled: playEnabled // quick join also needs a Google login
     property var modules: []
     property var servers: []   // [{name, host, port}]
     property string versionName
@@ -101,12 +102,12 @@ Item {
                         width: joinText.implicitWidth + 18
                         height: 22
                         radius: 11
-                        color: hero.playEnabled ? window.lumenAccent : "#3a3066"
+                        color: hero.joinEnabled ? window.lumenAccent : "#3a3066"
                         Text {
                             id: joinText
                             anchors.centerIn: parent
-                            text: hero.playEnabled ? qsTr("Join ▸") : qsTr("Not ready")
-                            color: hero.playEnabled ? window.lumenOn(window.lumenAccent) : "#a39cbd"
+                            text: hero.joinEnabled ? qsTr("Join ▸") : (hero.playEnabled ? qsTr("Sign in first") : qsTr("Not ready"))
+                            color: hero.joinEnabled ? window.lumenOn(window.lumenAccent) : "#a39cbd"
                             font.pointSize: 8.5
                             font.weight: Font.Bold
                         }
@@ -120,9 +121,9 @@ Item {
                     width: body.size + 12 + 8 + 200
                     height: body.size + 12
                     hoverEnabled: true
-                    cursorShape: hero.playEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+                    cursorShape: hero.joinEnabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                     readonly property bool hovered: containsMouse
-                    onClicked: if (hero.playEnabled) hero.joinServer(orbit.modelData)
+                    onClicked: if (hero.joinEnabled) hero.joinServer(orbit.modelData)
                 }
             }
         }

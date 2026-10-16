@@ -8,6 +8,7 @@ import "Components"
 Item {
     id: mainNavigation
     property int currentIndex: 0
+    readonly property bool joinSignedIn: googleLoginHelperInstance.account != null || googleLoginHelperInstance.hasEncryptedCredentials
     property bool useWideLayout: window.width > 720
     readonly property var pages: [
         { label: qsTr("Home"), index: 0, icon: "qrc:/Resources/lumen-nav-home.svg" },
@@ -78,6 +79,7 @@ Item {
     Component {
         id: serversPage
         ServersScreen {
+            joinAllowed: joinSignedIn
             onJoinRequested: function (uri) { joinQueued(uri) }
         }
     }
@@ -85,6 +87,7 @@ Item {
     Component {
         id: quickJoinPage
         QuickJoinScreen {
+            joinAllowed: joinSignedIn
             onJoinRequested: function (uri) { joinQueued(uri) }
         }
     }
