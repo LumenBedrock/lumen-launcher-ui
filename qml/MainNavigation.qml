@@ -1,106 +1,64 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls
+import QtQuick.Effects
 import "Components"
 
-RowLayout {
+// Page frame: the navigation of the active launcher design (window.lumenTheme) plus the page stack
+Item {
     id: mainNavigation
-    spacing: 0
     property int currentIndex: 0
     property bool useWideLayout: window.width > 720
+    readonly property var pages: [
+        { label: qsTr("Home"), index: 0, icon: "qrc:/Resources/lumen-nav-home.svg" },
+        { label: qsTr("Servers"), index: 7, icon: "qrc:/Resources/lumen-nav-servers.svg" },
+        { label: qsTr("Quick Join"), index: 8, icon: "qrc:/Resources/lumen-nav-servers.svg" },
+        { label: qsTr("Versions"), index: 6, icon: "qrc:/Resources/lumen-nav-versions.svg" },
+        { label: qsTr("Game Log"), index: 3, icon: "qrc:/Resources/lumen-nav-log.svg" },
+        { label: qsTr("Settings"), index: 4, icon: "qrc:/Resources/lumen-nav-settings.svg" }
+    ]
 
-    Rectangle {
-        Layout.fillHeight: true
-        Layout.preferredWidth: sidebarLayout.width
+    Loader {
+        id: nav
+        anchors.fill: parent
         z: 3
-        gradient: Gradient {
-            GradientStop { position: 0.0; color: "#1d1642" }
-            GradientStop { position: 1.0; color: "#0d0a1c" }
-        }
-        Rectangle {
-            anchors.right: parent.right
-            width: 1
-            height: parent.height
-            color: "#3b3068"
-        }
-        ColumnLayout {
-            id: sidebarLayout
-            anchors.top: parent.top
-            anchors.topMargin: 10
-            anchors.horizontalCenter: parent.horizontalCenter
-            RowLayout {
-                Layout.leftMargin: 14
-                Layout.bottomMargin: 18
-                spacing: 10
-                Image {
-                    source: "qrc:/Resources/lumen-icon.svg"
-                    sourceSize.width: 34
-                    sourceSize.height: 34
-                    Layout.preferredWidth: 34
-                    Layout.preferredHeight: 34
-                }
-                Text {
-                    visible: useWideLayout
-                    text: "LUMEN"
-                    color: "#e8b84a"
-                    font.pointSize: 13
-                    font.bold: true
-                    font.letterSpacing: 3
-                }
-            }
-            MSideBarItem {
-                text: qsTr("Home")
-                iconSource: "qrc:/Resources/lumen-nav-home.svg"
-                showText: useWideLayout
-                onClicked: updateIndex(0)
-                checked: currentIndex == 0
-            }
-            MSideBarItem {
-                text: qsTr("Servers")
-                iconSource: "qrc:/Resources/lumen-nav-servers.svg"
-                showText: useWideLayout
-                onClicked: updateIndex(7)
-                checked: currentIndex === 7
-            }
-            MSideBarItem {
-                text: qsTr("Versions")
-                iconSource: "qrc:/Resources/lumen-nav-versions.svg"
-                showText: useWideLayout
-                onClicked: updateIndex(6)
-                checked: currentIndex === 6
-            }
-            MSideBarItem {
-                text: qsTr("Game Log")
-                iconSource: "qrc:/Resources/lumen-nav-log.svg"
-                showText: useWideLayout
-                onClicked: updateIndex(3)
-                checked: currentIndex === 3
-            }
-            MSideBarItem {
-                text: qsTr("Settings")
-                iconSource: "qrc:/Resources/lumen-nav-settings.svg"
-                showText: useWideLayout
-                onClicked: updateIndex(4)
-                checked: currentIndex == 4
-            }
-            MSideBarItem {
-                visible: launcherSettings.showExitButton
-                text: qsTr("Exit")
-                iconSource: "qrc:/Resources/icon-exit.png"
-                showText: useWideLayout
-                onClicked: Qt.quit()
-                checked: false
-            }
-        }
+        sourceComponent: ({ classic: navTopBar, pixel: navPixel, nebula: navDock, orbit: navArc })[window.lumenTheme] || navSidebar
     }
+    Component { id: navSidebar; NavSidebar { navigation: mainNavigation } }
+    Component { id: navTopBar; NavTopBar { navigation: mainNavigation } }
+    Component { id: navPixel; NavPixel { navigation: mainNavigation } }
+    Component { id: navDock; NavDock { navigation: mainNavigation } }
+    Component { id: navArc; NavArc { navigation: mainNavigation } }
 
     StackView {
         id: mainStackView
         initialItem: launcherHomePage
-        Layout.fillHeight: true
-        Layout.fillWidth: true
-        Layout.minimumHeight: 200
-        Layout.minimumWidth: 400
+        // sub pages fade and slide in
+        pushEnter: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 260; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "x"; from: 24; to: 0; duration: 340; easing.type: Easing.OutCubic }
+            }
+        }
+        pushExit: Transition { NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 90 } }
+        popEnter: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 260; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "x"; from: -24; to: 0; duration: 340; easing.type: Easing.OutCubic }
+            }
+        }
+        popExit: Transition { NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 160 } }
+        replaceEnter: Transition {
+            ParallelAnimation {
+                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 220; easing.type: Easing.OutCubic }
+                NumberAnimation { property: "x"; from: 18; to: 0; duration: 300; easing.type: Easing.OutCubic }
+            }
+        }
+        replaceExit: Transition { NumberAnimation { property: "opacity"; from: 1; to: 0; duration: 90 } }
+        anchors.fill: parent
+        anchors.leftMargin: nav.item ? nav.item.reserveLeft : 0
+        anchors.topMargin: nav.item ? nav.item.reserveTop : 0
+        anchors.bottomMargin: nav.item ? nav.item.reserveBottom : 0
     }
 
     Component {
@@ -119,7 +77,16 @@ RowLayout {
 
     Component {
         id: serversPage
-        ServersScreen {}
+        ServersScreen {
+            onJoinRequested: function (uri) { joinQueued(uri) }
+        }
+    }
+
+    Component {
+        id: quickJoinPage
+        QuickJoinScreen {
+            onJoinRequested: function (uri) { joinQueued(uri) }
+        }
     }
 
     Component {
@@ -167,23 +134,26 @@ RowLayout {
             updateIndex(LUMEN_START_PAGE)
     }
 
+    // start the game and hand it the Bedrock connect link
+    function joinQueued(uri) {
+        updateIndex(0)
+        if (mainStackView.currentItem) mainStackView.currentItem.playUri(uri)
+    }
+
     function updateIndex(index) {
         if (index === currentIndex)
             return
 
-        mainStackView.pop(null)
-
-        if (index === 6) {
-            mainStackView.push(versionsPage)
-        } else if (index === 7) {
-            mainStackView.push(serversPage)
-        } else if (index === 3) {
-            mainStackView.push(gameLogPage)
-        } else if (index === 4) {
-            mainStackView.push(launcherSettingsPage)
-        }
+        const page = ({ 6: versionsPage, 7: serversPage, 8: quickJoinPage, 3: gameLogPage, 4: launcherSettingsPage })[index]
+        if (!page)
+            mainStackView.pop(null)                                   // back home
+        else if (mainStackView.depth > 1)
+            mainStackView.replace(mainStackView.currentItem, page)    // page to page: home never shows in between
+        else
+            mainStackView.push(page)
 
         currentIndex = index
+        window.lumenCalm = index !== 0
     }
 
     Connections {

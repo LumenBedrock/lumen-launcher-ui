@@ -15,7 +15,7 @@ ColumnLayout {
         MButton {
             anchors.verticalCenter: parent.verticalCenter
             anchors.right: parent.right
-            anchors.rightMargin: 10
+            anchors.rightMargin: 64 // the design picker sits in the corner
             height: 34
             width: 34
             onClicked: {

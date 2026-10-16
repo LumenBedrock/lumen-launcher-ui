@@ -5,6 +5,7 @@
 #include <QUrl>
 #include <QStringList>
 #include <QMap>
+#include <QVariantList>
 
 // Reads and edits the Lumen client mod's lumen.conf (key=value lines) so the
 // launcher can toggle modules. Only touches the lines it changes; every other
@@ -24,6 +25,8 @@ public:
     Q_INVOKABLE void reload();
     Q_INVOKABLE bool getBool(const QString &key, bool def) const;
     Q_INVOKABLE void setBool(const QString &key, bool value);
+    // Modules from the client's lumen_modules.json: [{name, enabled}], empty if the game never ran
+    Q_INVOKABLE QVariantList modules() const;
 
 signals:
     void changed();

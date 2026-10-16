@@ -55,7 +55,7 @@ MComboBox {
             id: separator
             width: parent.width
             height: 1
-            color: "#3b3068"
+            color: window.lumenLine
             visible: hasSeparator
             radius: 2
         }
@@ -73,7 +73,7 @@ MComboBox {
 
         background: Rectangle {
             anchors.fill: parent
-            color: highlighted ? "#5b3fc4" : (parent.hovered ? "#2a2250" : "#16112e")
+            color: highlighted ? Qt.darker(window.lumenAccent, 1.4) : (parent.hovered ? window.lumenSurfaceHigh : window.lumenSurfaceLow)
         }
     }
 

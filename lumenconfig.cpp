@@ -3,6 +3,9 @@
 #include <QFile>
 #include <QSaveFile>
 #include <QTextStream>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
 
 QString LumenConfig::path() const {
     return m_dataDir.toLocalFile() + "/lumen.conf";
@@ -69,4 +72,19 @@ bool LumenConfig::write() {
     out.flush();
     m_available = true;
     return f.commit();
+}
+
+QVariantList LumenConfig::modules() const {
+    QVariantList out;
+    QFile f(m_dataDir.toLocalFile() + "/lumen_modules.json");
+    if (!f.open(QIODevice::ReadOnly))
+        return out;
+    const QJsonArray mods = QJsonDocument::fromJson(f.readAll()).object().value("modules").toArray();
+    for (const auto &m : mods) {
+        const QJsonObject o = m.toObject();
+        if (o.value("name").toString().isEmpty())
+            continue;
+        out.append(QVariantMap{{"name", o.value("name").toString()}, {"enabled", o.value("enabled").toBool()}});
+    }
+    return out;
 }

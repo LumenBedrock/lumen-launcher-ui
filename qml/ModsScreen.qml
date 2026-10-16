@@ -321,7 +321,7 @@ AnimatedStackLayout {
                         onClicked: downloads.currentIndex = index
                         highlighted: ListView.isCurrentItem
                         background: Rectangle {
-                            color: control.highlighted ? "#5b3fc4" : (control.down ? "#7a5af0" : (control.hovered ? "#1c1638" : "transparent"))
+                            color: control.highlighted ? Qt.darker(window.lumenAccent, 1.4) : (control.down ? window.lumenAccent : (control.hovered ? window.lumenSurface : "transparent"))
                         }
                     }
                     highlightResizeVelocity: -1

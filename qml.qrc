@@ -19,6 +19,7 @@
         <file>qml/HomeScreen.qml</file>
         <file>qml/VersionsScreen.qml</file>
         <file>qml/ServersScreen.qml</file>
+        <file>qml/QuickJoinScreen.qml</file>
         <file>qml/PackEditor.qml</file>
         <file>qml/NewsScreen.qml</file>
         <file>qml/ModsScreen.qml</file>
@@ -72,6 +73,40 @@
         <file>Resources/icon-delete.png</file>
         <file>Resources/icon-folder.png</file>
         <file>Resources/icon-edit.svg</file>
+        <file>Resources/fonts/OFL-inter.txt</file>
+        <file>Resources/fonts/OFL-sora.txt</file>
+        <file>Resources/fonts/inter-400-latin-ext.woff2</file>
+        <file>Resources/fonts/inter-400-latin.woff2</file>
+        <file>Resources/fonts/inter-500-latin.woff2</file>
+        <file>Resources/fonts/inter-600-latin-ext.woff2</file>
+        <file>Resources/fonts/inter-600-latin.woff2</file>
+        <file>Resources/fonts/sora-700-latin-ext.woff2</file>
+        <file>Resources/fonts/sora-700-latin.woff2</file>
+        <file>Resources/fonts/sora-800-latin.woff2</file>
+        <file>qml/Components/SpaceBackground.qml</file>
+        <file>qml/Components/RadialGlow.qml</file>
+        <file>qml/Components/HeroStar.qml</file>
+        <file>qml/Components/GradientText.qml</file>
+        <file>qml/Components/HeroClassic.qml</file>
+        <file>qml/Components/HeroNebula.qml</file>
+        <file>qml/Components/HeroOrbit.qml</file>
+        <file>qml/Components/HeroPixel.qml</file>
+        <file>qml/Components/HeroSun.qml</file>
+        <file>qml/Components/NavArc.qml</file>
+        <file>qml/Components/NavDock.qml</file>
+        <file>qml/Components/NavPixel.qml</file>
+        <file>qml/Components/NavSidebar.qml</file>
+        <file>qml/Components/NavTopBar.qml</file>
+        <file>qml/Components/PixelStar.qml</file>
+        <file>qml/Components/ThemePicker.qml</file>
+        <file>Resources/fonts/OFL-outfit.txt</file>
+        <file>Resources/fonts/OFL-pixelifysans.txt</file>
+        <file>Resources/fonts/OFL-silkscreen.txt</file>
+        <file>Resources/fonts/Outfit.ttf</file>
+        <file>Resources/fonts/PixelifySans.ttf</file>
+        <file>Resources/fonts/Silkscreen-Bold.ttf</file>
+        <file>Resources/fonts/Silkscreen-Regular.ttf</file>
+        <file>Resources/pixel-tile.png</file>
         <file>LICENSE</file>
     </qresource>
 </RCC>

@@ -10,6 +10,7 @@ ColumnLayout {
     property bool locked: gameLauncher.running
     // Which dropdowns are open, kept here because every edit rebuilds the cards
     property var openState: ({})
+    signal joinRequested(string uri)
     Component.onCompleted: { // headless test hook: open the first server's dropdowns
         if (LUMEN_START_SET && store.profiles.length > 0) {
             var n = store.profiles[0].name
@@ -43,7 +44,7 @@ ColumnLayout {
             Text {
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                color: "#9a8fd0"
+                color: window.lumenMuted
                 font.pointSize: 10
                 text: page.locked ? qsTr("The game is running: close it to edit servers here.")
                                   : qsTr("Per-server setups for the Lumen client. These are the same profiles you see in game, and changes apply the next time you join. Texture packs, module switches and values are all editable here too.")
@@ -54,9 +55,9 @@ ColumnLayout {
                 Layout.fillWidth: true
                 implicitHeight: addCol.implicitHeight + 24
                 radius: 12
-                color: "#1c1638"
+                color: window.lumenSurface
                 border.width: 1
-                border.color: "#3b3068"
+                border.color: window.lumenLine
                 enabled: !page.locked && store.available
                 ColumnLayout {
                     id: addCol
@@ -65,7 +66,7 @@ ColumnLayout {
                     spacing: 8
                     Text {
                         text: qsTr("NEW SERVER")
-                        color: "#e8b84a"
+                        color: window.lumenGlow
                         font.pointSize: 9
                         font.bold: true
                         font.letterSpacing: 2
@@ -102,7 +103,7 @@ ColumnLayout {
                 visible: !store.available
                 Layout.fillWidth: true
                 wrapMode: Text.WordWrap
-                color: "#9a8fd0"
+                color: window.lumenMuted
                 text: qsTr("No server profiles yet. Add one above, or join a server in game with Lumen and it creates one for you.")
             }
 
@@ -131,9 +132,9 @@ ColumnLayout {
                     Layout.fillWidth: true
                     implicitHeight: cardCol.implicitHeight + 24
                     radius: 12
-                    color: "#1c1638"
+                    color: window.lumenSurface
                     border.width: 1
-                    border.color: "#3b3068"
+                    border.color: window.lumenLine
                     enabled: !page.locked
 
                     ColumnLayout {
@@ -162,7 +163,7 @@ ColumnLayout {
                                 anchors.right: srvCaret.left
                                 anchors.rightMargin: 8
                                 text: card.modelData.hosts
-                                color: "#9a8fd0"
+                                color: window.lumenMuted
                                 font.pointSize: 10
                                 elide: Text.ElideRight
                             }
@@ -171,7 +172,7 @@ ColumnLayout {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.right: parent.right
                                 text: card.cardOpen ? "-" : "+"
-                                color: "#e8b84a"
+                                color: window.lumenGlow
                                 font.pointSize: 13
                             }
                             MouseArea {
@@ -189,6 +190,10 @@ ColumnLayout {
 
                         RowLayout {
                             Layout.fillWidth: true
+                            MButton {
+                                text: qsTr("Join")
+                                onClicked: { var u = store.joinUri(card.modelData.name); if (u) page.joinRequested(u) }
+                            }
                             Item { Layout.fillWidth: true }
                             MButton {
                                 text: qsTr("Remove this server")
@@ -215,9 +220,9 @@ ColumnLayout {
                             Layout.fillWidth: true
                             height: 34
                             radius: 8
-                            color: packHead.containsMouse ? "#241c4a" : "#16112e"
+                            color: packHead.containsMouse ? window.lumenSurfaceHigh : window.lumenSurfaceLow
                             border.width: 1
-                            border.color: "#3b3068"
+                            border.color: window.lumenLine
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.left: parent.left
@@ -231,7 +236,7 @@ ColumnLayout {
                                 anchors.right: parent.right
                                 anchors.rightMargin: 12
                                 text: qsTr("%1 active").arg(card.modelData.packList.length) + "   " + (card.packsOpen ? "-" : "+")
-                                color: "#e8b84a"
+                                color: window.lumenGlow
                                 font.pointSize: 10
                             }
                             MouseArea {
@@ -243,21 +248,26 @@ ColumnLayout {
                             }
                         }
 
-                        ColumnLayout {
-                            visible: card.modelData.setPacks && card.packsOpen
+                        Loader {
+                            active: card.modelData.setPacks && card.packsOpen
+                            visible: active
                             Layout.fillWidth: true
-                            spacing: 6
+                            sourceComponent: Component {
+                                ColumnLayout {
+                                    spacing: 6
 
-                            PackEditor {
-                                Layout.fillWidth: true
-                                active: card.modelData.packList
-                                available: store.availablePacks.map(function (p) { return p.name })
-                                onStackChanged: list => store.setPacks(card.modelData.name, list)
-                            }
-                            MButton {
-                                text: qsTr("Copy current stack")
-                                implicitHeight: 30
-                                onClicked: store.setPacks(card.modelData.name, store.currentPackNames())
+                                    PackEditor {
+                                        Layout.fillWidth: true
+                                        active: card.modelData.packList
+                                        available: store.availablePacks.map(function (p) { return p.name })
+                                        onStackChanged: list => store.setPacks(card.modelData.name, list)
+                                    }
+                                    MButton {
+                                        text: qsTr("Copy current stack")
+                                        implicitHeight: 30
+                                        onClicked: store.setPacks(card.modelData.name, store.currentPackNames())
+                                    }
+                                }
                             }
                         }
 
@@ -266,9 +276,9 @@ ColumnLayout {
                             Layout.fillWidth: true
                             height: 34
                             radius: 8
-                            color: headMouse.containsMouse ? "#241c4a" : "#16112e"
+                            color: headMouse.containsMouse ? window.lumenSurfaceHigh : window.lumenSurfaceLow
                             border.width: 1
-                            border.color: "#3b3068"
+                            border.color: window.lumenLine
                             Text {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.left: parent.left
@@ -282,7 +292,7 @@ ColumnLayout {
                                 anchors.right: parent.right
                                 anchors.rightMargin: 12
                                 text: (card.modelData.modules.length > 0 ? qsTr("%1 set").arg(card.modelData.modules.length) + "   " : "") + (card.modulesOpen ? "-" : "+")
-                                color: "#e8b84a"
+                                color: window.lumenGlow
                                 font.pointSize: 10
                             }
                             MouseArea {
@@ -295,184 +305,194 @@ ColumnLayout {
                         }
 
                         // Catalogue-driven editor: every module the client can switch per server, with its settings
-                        ColumnLayout {
-                            visible: card.modulesOpen && store.moduleCatalog.length > 0
+                        Loader {
+                            active: card.modulesOpen && store.moduleCatalog.length > 0
+                            visible: active
                             Layout.fillWidth: true
-                            spacing: 4
+                            sourceComponent: Component {
+                                ColumnLayout {
+                                    spacing: 4
 
-                            Repeater {
-                                model: store.moduleCatalog
-                                delegate: Column {
-                                    id: modBlock
-                                    required property var modelData
-                                    property bool open: page.isOpen(card.modelData.name + "#mod#" + modBlock.modelData.name)
-                                    property string modName: modBlock.modelData.name
-                                    property int setCount: {
-                                        var n = card.modMap[modName] !== undefined ? 1 : 0
-                                        for (var k in card.valueMap)
-                                            if (k.indexOf(modName + "|") === 0) n++
-                                        return n
-                                    }
-                                    Layout.fillWidth: true
-                                    spacing: 2
-
-                                    Rectangle {
-                                        width: modBlock.width
-                                        height: 34
-                                        radius: 8
-                                        color: modBlock.open ? "#2d2459" : (modMouse.containsMouse ? "#241c4a" : "#16112e")
-                                        border.width: 1
-                                        border.color: modBlock.open ? "#e8b84a" : "#3b3068"
-                                        Text {
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            anchors.left: parent.left
-                                            anchors.leftMargin: 12
-                                            text: modBlock.modName + (modBlock.setCount > 0 ? "   (" + modBlock.setCount + " set)" : "")
-                                            color: modBlock.open ? "#e8b84a" : "#fff"
-                                            font.pointSize: 10
-                                        }
-                                        Text {
-                                            id: caret
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            anchors.right: parent.right
-                                            anchors.rightMargin: 12
-                                            text: modBlock.open ? "-" : "+"
-                                            color: "#e8b84a"
-                                        }
-                                        MouseArea {
-                                            id: modMouse
-                                            anchors.fill: parent
-                                            anchors.rightMargin: modBlock.modelData.hasSwitch ? 120 : 0
-                                            hoverEnabled: true
-                                            cursorShape: Qt.PointingHandCursor
-                                            onClicked: page.setOpen(card.modelData.name + "#mod#" + modBlock.modName, !modBlock.open)
-                                        }
-                                        Row {
-                                            visible: modBlock.modelData.hasSwitch
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            anchors.right: caret.left
-                                            anchors.rightMargin: 12
-                                            spacing: 4
-                                            MButton {
-                                                visible: card.modMap[modBlock.modName] !== undefined
-                                                implicitHeight: 26
-                                                text: qsTr("Use normal")
-                                                onClicked: store.clearModule(card.modelData.name, modBlock.modName)
+                                    Repeater {
+                                        model: store.moduleCatalog
+                                        delegate: Column {
+                                            id: modBlock
+                                            required property var modelData
+                                            property bool open: page.isOpen(card.modelData.name + "#mod#" + modBlock.modelData.name)
+                                            property string modName: modBlock.modelData.name
+                                            property int setCount: {
+                                                var n = card.modMap[modName] !== undefined ? 1 : 0
+                                                for (var k in card.valueMap)
+                                                    if (k.indexOf(modName + "|") === 0) n++
+                                                return n
                                             }
-                                            MCheckBox {
-                                                text: qsTr("On")
-                                                checked: card.modMap[modBlock.modName] !== undefined ? card.modMap[modBlock.modName] : modBlock.modelData.enabled
-                                                onClicked: store.setModule(card.modelData.name, modBlock.modName, checked)
-                                            }
-                                        }
-                                    }
+                                            Layout.fillWidth: true
+                                            spacing: 2
 
-                                    ColumnLayout {
-                                        id: inner
-                                        visible: modBlock.open
-                                        x: 14
-                                        width: modBlock.width - 14
-                                        spacing: 3
-                                        Repeater {
-                                            model: modBlock.modelData.settings
-                                            delegate: RowLayout {
-                                                id: setRow
-                                                required property var modelData
-                                                property string key: modBlock.modName + "|" + setRow.modelData.label
-                                                property bool has: card.valueMap[key] !== undefined
-                                                property real val: has ? card.valueMap[key] : setRow.modelData.current
-                                                Layout.fillWidth: true
-                                                spacing: 8
-
-                                                MCheckBox {
-                                                    visible: setRow.modelData.kind === "toggle"
-                                                    Layout.fillWidth: true
-                                                    text: setRow.modelData.label
-                                                    checked: setRow.val !== 0
-                                                    onClicked: store.setValue(card.modelData.name, setRow.key, checked ? 1 : 0)
-                                                }
+                                            Rectangle {
+                                                width: modBlock.width
+                                                height: 34
+                                                radius: 8
+                                                color: modBlock.open ? window.lumenSurfaceHigh : (modMouse.containsMouse ? window.lumenSurfaceHigh : window.lumenSurfaceLow)
+                                                border.width: 1
+                                                border.color: modBlock.open ? window.lumenGlow : window.lumenLine
                                                 Text {
-                                                    visible: setRow.modelData.kind !== "toggle"
-                                                    Layout.preferredWidth: 150
-                                                    text: setRow.modelData.label
-                                                    color: setRow.has ? "#fff" : "#b8aee0"
-                                                    font.pointSize: 10
-                                                    elide: Text.ElideRight
-                                                }
-                                                // slider
-                                                Slider {
-                                                    id: valSlider
-                                                    visible: setRow.modelData.kind === "slider"
-                                                    background: Rectangle {
-                                                        x: valSlider.leftPadding
-                                                        y: valSlider.topPadding + valSlider.availableHeight / 2 - height / 2
-                                                        width: valSlider.availableWidth
-                                                        height: 4
-                                                        radius: 2
-                                                        color: "#3b3068"
-                                                        Rectangle {
-                                                            width: valSlider.visualPosition * parent.width
-                                                            height: parent.height
-                                                            radius: 2
-                                                            color: "#7a5af0"
-                                                        }
-                                                    }
-                                                    handle: Rectangle {
-                                                        x: valSlider.leftPadding + valSlider.visualPosition * (valSlider.availableWidth - width)
-                                                        y: valSlider.topPadding + valSlider.availableHeight / 2 - height / 2
-                                                        width: 14
-                                                        height: 14
-                                                        radius: 7
-                                                        color: valSlider.pressed ? "#fff" : "#e8b84a"
-                                                    }
-                                                    Layout.fillWidth: true
-                                                    from: setRow.modelData.min
-                                                    to: setRow.modelData.max
-                                                    stepSize: setRow.modelData.step
-                                                    value: setRow.val
-                                                    onPressedChanged: if (!pressed) store.setValue(card.modelData.name, setRow.key, value)
-                                                }
-                                                Text {
-                                                    visible: setRow.modelData.kind === "slider"
-                                                    Layout.preferredWidth: 56
-                                                    horizontalAlignment: Text.AlignRight
-                                                    text: Number(setRow.val).toFixed(setRow.modelData.decimals)
-                                                    color: "#e8b84a"
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    anchors.left: parent.left
+                                                    anchors.leftMargin: 12
+                                                    text: modBlock.modName + (modBlock.setCount > 0 ? "   (" + modBlock.setCount + " set)" : "")
+                                                    color: modBlock.open ? window.lumenGlow : "#fff"
                                                     font.pointSize: 10
                                                 }
-                                                // cycle: one chip per option
-                                                Flow {
-                                                    visible: setRow.modelData.kind === "cycle"
-                                                    Layout.fillWidth: true
+                                                Text {
+                                                    id: caret
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    anchors.right: parent.right
+                                                    anchors.rightMargin: 12
+                                                    text: modBlock.open ? "-" : "+"
+                                                    color: window.lumenGlow
+                                                }
+                                                MouseArea {
+                                                    id: modMouse
+                                                    anchors.fill: parent
+                                                    anchors.rightMargin: modBlock.modelData.hasSwitch ? 120 : 0
+                                                    hoverEnabled: true
+                                                    cursorShape: Qt.PointingHandCursor
+                                                    onClicked: page.setOpen(card.modelData.name + "#mod#" + modBlock.modName, !modBlock.open)
+                                                }
+                                                Row {
+                                                    visible: modBlock.modelData.hasSwitch
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    anchors.right: caret.left
+                                                    anchors.rightMargin: 12
                                                     spacing: 4
-                                                    Repeater {
-                                                        model: setRow.modelData.options || []
-                                                        delegate: MButton {
-                                                            required property string modelData
-                                                            required property int index
-                                                            implicitHeight: 26
-                                                            text: (index === Math.round(setRow.val) ? "● " : "") + modelData
-                                                            onClicked: store.setValue(card.modelData.name, setRow.key, index)
+                                                    MButton {
+                                                        visible: card.modMap[modBlock.modName] !== undefined
+                                                        implicitHeight: 26
+                                                        text: qsTr("Use normal")
+                                                        onClicked: store.clearModule(card.modelData.name, modBlock.modName)
+                                                    }
+                                                    MCheckBox {
+                                                        text: qsTr("On")
+                                                        checked: card.modMap[modBlock.modName] !== undefined ? card.modMap[modBlock.modName] : modBlock.modelData.enabled
+                                                        onClicked: store.setModule(card.modelData.name, modBlock.modName, checked)
+                                                    }
+                                                }
+                                            }
+
+                                            Loader {
+                                                active: modBlock.open
+                                                visible: active
+                                                x: 14
+                                                width: modBlock.width - 14
+                                                sourceComponent: Component {
+                                                    ColumnLayout {
+                                                        id: inner
+                                                        spacing: 3
+                                                        Repeater {
+                                                            model: modBlock.modelData.settings
+                                                            delegate: RowLayout {
+                                                                id: setRow
+                                                                required property var modelData
+                                                                property string key: modBlock.modName + "|" + setRow.modelData.label
+                                                                property bool has: card.valueMap[key] !== undefined
+                                                                property real val: has ? card.valueMap[key] : setRow.modelData.current
+                                                                Layout.fillWidth: true
+                                                                spacing: 8
+
+                                                                MCheckBox {
+                                                                    visible: setRow.modelData.kind === "toggle"
+                                                                    Layout.fillWidth: true
+                                                                    text: setRow.modelData.label
+                                                                    checked: setRow.val !== 0
+                                                                    onClicked: store.setValue(card.modelData.name, setRow.key, checked ? 1 : 0)
+                                                                }
+                                                                Text {
+                                                                    visible: setRow.modelData.kind !== "toggle"
+                                                                    Layout.preferredWidth: 150
+                                                                    text: setRow.modelData.label
+                                                                    color: setRow.has ? "#fff" : window.lumenMuted
+                                                                    font.pointSize: 10
+                                                                    elide: Text.ElideRight
+                                                                }
+                                                                // slider
+                                                                Slider {
+                                                                    id: valSlider
+                                                                    visible: setRow.modelData.kind === "slider"
+                                                                    background: Rectangle {
+                                                                        x: valSlider.leftPadding
+                                                                        y: valSlider.topPadding + valSlider.availableHeight / 2 - height / 2
+                                                                        width: valSlider.availableWidth
+                                                                        height: 4
+                                                                        radius: 2
+                                                                        color: window.lumenLine
+                                                                        Rectangle {
+                                                                            width: valSlider.visualPosition * parent.width
+                                                                            height: parent.height
+                                                                            radius: 2
+                                                                            color: window.lumenAccent
+                                                                        }
+                                                                    }
+                                                                    handle: Rectangle {
+                                                                        x: valSlider.leftPadding + valSlider.visualPosition * (valSlider.availableWidth - width)
+                                                                        y: valSlider.topPadding + valSlider.availableHeight / 2 - height / 2
+                                                                        width: 14
+                                                                        height: 14
+                                                                        radius: 7
+                                                                        color: valSlider.pressed ? "#fff" : window.lumenGlow
+                                                                    }
+                                                                    Layout.fillWidth: true
+                                                                    from: setRow.modelData.min
+                                                                    to: setRow.modelData.max
+                                                                    stepSize: setRow.modelData.step
+                                                                    value: setRow.val
+                                                                    onPressedChanged: if (!pressed) store.setValue(card.modelData.name, setRow.key, value)
+                                                                }
+                                                                Text {
+                                                                    visible: setRow.modelData.kind === "slider"
+                                                                    Layout.preferredWidth: 56
+                                                                    horizontalAlignment: Text.AlignRight
+                                                                    text: Number(setRow.val).toFixed(setRow.modelData.decimals)
+                                                                    color: window.lumenGlow
+                                                                    font.pointSize: 10
+                                                                }
+                                                                // cycle: one chip per option
+                                                                Flow {
+                                                                    visible: setRow.modelData.kind === "cycle"
+                                                                    Layout.fillWidth: true
+                                                                    spacing: 4
+                                                                    Repeater {
+                                                                        model: setRow.modelData.options || []
+                                                                        delegate: MButton {
+                                                                            required property string modelData
+                                                                            required property int index
+                                                                            implicitHeight: 26
+                                                                            text: (index === Math.round(setRow.val) ? "● " : "") + modelData
+                                                                            onClicked: store.setValue(card.modelData.name, setRow.key, index)
+                                                                        }
+                                                                    }
+                                                                }
+                                                                // key code / colour: typed value
+                                                                MTextField {
+                                                                    visible: setRow.modelData.kind === "key" || setRow.modelData.kind === "color"
+                                                                    Layout.fillWidth: true
+                                                                    implicitHeight: 28
+                                                                    text: setRow.modelData.kind === "color" ? "#" + ("000000" + Math.round(setRow.val).toString(16)).slice(-6).toUpperCase() : Math.round(setRow.val).toString()
+                                                                    placeholderText: setRow.modelData.kind === "color" ? "#RRGGBB" : qsTr("key code")
+                                                                    onEditingFinished: {
+                                                                        var v = setRow.modelData.kind === "color" ? parseInt(text.replace("#", ""), 16) : parseInt(text)
+                                                                        if (!isNaN(v)) store.setValue(card.modelData.name, setRow.key, v)
+                                                                    }
+                                                                }
+                                                                MButton {
+                                                                    visible: setRow.has
+                                                                    implicitHeight: 26
+                                                                    text: qsTr("Use normal")
+                                                                    onClicked: store.clearValue(card.modelData.name, setRow.key)
+                                                                }
+                                                            }
                                                         }
                                                     }
-                                                }
-                                                // key code / colour: typed value
-                                                MTextField {
-                                                    visible: setRow.modelData.kind === "key" || setRow.modelData.kind === "color"
-                                                    Layout.fillWidth: true
-                                                    implicitHeight: 28
-                                                    text: setRow.modelData.kind === "color" ? "#" + ("000000" + Math.round(setRow.val).toString(16)).slice(-6).toUpperCase() : Math.round(setRow.val).toString()
-                                                    placeholderText: setRow.modelData.kind === "color" ? "#RRGGBB" : qsTr("key code")
-                                                    onEditingFinished: {
-                                                        var v = setRow.modelData.kind === "color" ? parseInt(text.replace("#", ""), 16) : parseInt(text)
-                                                        if (!isNaN(v)) store.setValue(card.modelData.name, setRow.key, v)
-                                                    }
-                                                }
-                                                MButton {
-                                                    visible: setRow.has
-                                                    implicitHeight: 26
-                                                    text: qsTr("Use normal")
-                                                    onClicked: store.clearValue(card.modelData.name, setRow.key)
                                                 }
                                             }
                                         }
@@ -490,7 +510,7 @@ ColumnLayout {
                             Text {
                                 Layout.fillWidth: true
                                 wrapMode: Text.WordWrap
-                                color: "#9a8fd0"
+                                color: window.lumenMuted
                                 font.pointSize: 9
                                 text: qsTr("Start the game once with this version of Lumen to unlock every module setting here. Until then you can only edit what is already saved for this server.")
                             }

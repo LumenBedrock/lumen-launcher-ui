@@ -40,6 +40,10 @@ void GameLauncher::start(bool disableGameLog, QString arch, bool hasVerifiedLice
         args.append("--import-file-path");
         args.append(filepath);
     }
+    if (m_uri.length() > 0) {
+        args.append("--uri");
+        args.append(m_uri);
+    }
     if (!hasVerifiedLicense) {
         args.append("--free-only");
     }

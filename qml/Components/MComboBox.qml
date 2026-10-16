@@ -12,8 +12,10 @@ T.ComboBox {
     opacity: control.enabled ? 1.0 : 0.3
 
     background: Rectangle {
-        border.color: control.hovered ? "#666" : "#4a3d80"
-        color: "#16112e"
+        border.color: control.hovered || control.popup.visible ? Qt.lighter(window.lumenAccent, 1.15) : window.lumenLine
+        color: window.lumenAlpha(window.lumenSurfaceLow, 0.8)
+        radius: 10
+        Behavior on border.color { ColorAnimation { duration: 150 } }
         FocusBorder {
             visible: control.visualFocus
         }
@@ -41,8 +43,8 @@ T.ComboBox {
         highlighted: control.highlightedIndex === index
         background: Rectangle {
             anchors.fill: parent
-            color: highlighted ? "#2a2250" : "#16112e"
-            radius: 2
+            color: highlighted ? "#4d7c5cff" : window.lumenSurfaceLow
+            radius: 8
 
             FocusBorder {
                 visible: highlighted && control.visualFocus
@@ -88,9 +90,9 @@ T.ComboBox {
         }
 
         background: Rectangle {
-            color: "#16112e"
-            border.color: "#4a3d80"
-            radius: 2
+            color: window.lumenAlpha(window.lumenSurface, 0.96)
+            border.color: "#59b59cff"
+            radius: 12
         }
 
         enter: Transition {

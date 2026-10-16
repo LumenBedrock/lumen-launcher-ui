@@ -23,6 +23,9 @@
 #include "downloadtask.h"
 
 #include <QTranslator>
+#include <QFontDatabase>
+#include <QFont>
+#include <QDir>
 #include <QCommandLineParser>
 #include <QCommandLineOption>
 #include <curl/curl.h>
@@ -73,6 +76,14 @@ int main(int argc, char *argv[])
 
     LauncherApp app(argc, argv);
     app.setWindowIcon(QIcon(":/Resources/lumen-icon.svg"));
+    // Lumen look: the website's fonts (Inter for text, Sora for headings), bundled under the OFL
+    for (const QString &f : QDir(":/Resources/fonts").entryList({"*.woff2", "*.ttf"}))
+        QFontDatabase::addApplicationFont(":/Resources/fonts/" + f);
+    if (QFontDatabase::families().contains("Inter")) {
+        QFont uiFont("Inter");
+        uiFont.setPointSizeF(app.font().pointSizeF());
+        app.setFont(uiFont);
+    }
     QGuiApplication::setDesktopFileName("lumen-launcher");
     QTranslator translator;
     if (translator.load(QLocale(), QLatin1String("mcpelauncher"), QLatin1String("_"), QLatin1String(":/translations"))) {

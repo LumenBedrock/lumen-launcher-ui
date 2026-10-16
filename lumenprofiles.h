@@ -28,10 +28,11 @@ public:
     QVariantList profiles() const;
     QStringList knownModules() const;
     QVariantList moduleCatalog() const { return m_catalog; }
-    QVariantList availablePacks() const; // [{name, folder}] from resource_packs/*/manifest.json
+    QVariantList availablePacks() const { return m_packs; } // [{name, folder}] from resource_packs/*/manifest.json
 
     Q_INVOKABLE void reload();
     Q_INVOKABLE bool addProfile(const QString &name, const QString &hosts);
+    Q_INVOKABLE QString joinUri(const QString &name); // minecraft://connect link for the server, empty if unknown
     Q_INVOKABLE void removeProfile(const QString &name);
     Q_INVOKABLE void setHosts(const QString &name, const QString &hosts);
     Q_INVOKABLE void setModule(const QString &name, const QString &module, bool on);
@@ -57,4 +58,6 @@ private:
     bool m_available = false;
     QStringList m_lines;
     QVariantList m_catalog;
+    QVariantList scanAvailablePacks() const;
+    QVariantList m_packs; // resource packs on disk, scanned once per reload()
 };

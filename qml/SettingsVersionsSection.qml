@@ -16,7 +16,7 @@ ColumnLayout {
         Popup {
             id: downloadApk
             background: Rectangle {
-                color: "#2a2250"
+                color: window.lumenSurfaceHigh
             }
             height: Math.min(scope.implicitHeight + 20, layout.outerHeight - 20)
             width: layout.width
@@ -342,7 +342,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.fillHeight: true
         Layout.minimumHeight: Math.max(window.height - 180, 150)
-        color: "#16112e"
+        color: window.lumenSurfaceLow
 
         ListView {
             id: versions
@@ -367,7 +367,7 @@ ColumnLayout {
                 onClicked: versions.currentIndex = index
                 highlighted: ListView.isCurrentItem
                 background: Rectangle {
-                    color: control.highlighted ? "#5b3fc4" : (control.down ? "#7a5af0" : (control.hovered ? "#1c1638" : "transparent"))
+                    color: control.highlighted ? Qt.darker(window.lumenAccent, 1.4) : (control.down ? window.lumenAccent : (control.hovered ? window.lumenSurface : "transparent"))
                 }
             }
             highlightResizeVelocity: -1

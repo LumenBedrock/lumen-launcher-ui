@@ -31,7 +31,7 @@ Item {
         anchors.centerIn: parent
         radius: 4
         visible: !extractingApk
-        color: "#1c1638"
+        color: window.lumenSurface
 
         ColumnLayout {
             id: container
@@ -79,7 +79,7 @@ Item {
 
                 TransparentButton {
                     text: qsTr("Use trial .apk").toUpperCase()
-                    textColor: "#e8b84a"
+                    textColor: window.lumenGlow
                     Layout.fillWidth: true
                     font.pointSize: 11
                     onClicked: apkImportHelper.pickFile()
@@ -87,7 +87,7 @@ Item {
 
                 TransparentButton {
                     text: qsTr("Get help").toUpperCase()
-                    textColor: "#e8b84a"
+                    textColor: window.lumenGlow
                     Layout.fillWidth: true
                     font.pointSize: 11
                     onClicked: Qt.openUrlExternally("https://minecraft-linux.github.io")
@@ -100,7 +100,7 @@ Item {
         width: 400
         height: extractContainer.height
         visible: extractingApk
-        color: "#1c1638"
+        color: window.lumenSurface
 
         ColumnLayout {
             id: extractContainer

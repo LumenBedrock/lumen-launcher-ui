@@ -10,7 +10,8 @@ T.TabButton {
 
     indicator: Rectangle {
         id: indicatorBar
-        color: "#9c6"
+        color: window.lumenGlow
+        radius: 2
         width: 0
         height: 3
         anchors.horizontalCenter: parent.horizontalCenter

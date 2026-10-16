@@ -32,7 +32,7 @@ ScrollView {
                 Layout.fillHeight: true
                 Layout.columnSpan: 1
                 Layout.rowSpan: 1
-                color: "#1c1638"
+                color: window.lumenSurface
                 height: iconImage.height + 20
 
                 Item {

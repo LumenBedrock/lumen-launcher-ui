@@ -33,6 +33,36 @@ BaseScreen {
         id: modManager
     }
 
+    // Lumen modules for the hero line and the marquee (re-read when the game exits)
+    LumenConfig {
+        id: lumenConfig
+        dataDir: launcherSettings.gameDataDir
+    }
+    // dataDir is set after creation; reading it here re-runs the binding then
+    property var lumenModules: lumenConfig.dataDir.toString() !== "" ? lumenConfig.modules() : []
+    Connections {
+        target: gameLauncher
+        function onStateChanged() {
+            if (!gameLauncher.running) {
+                playScreen.lumenModules = lumenConfig.modules()
+                lumenProfiles.reload()
+            }
+        }
+    }
+    // server profiles of the client, shown by the hosts they join
+    LumenProfiles {
+        id: lumenProfiles
+        dataDir: launcherSettings.gameDataDir
+    }
+    // [{name, host, port}] from the profiles' hosts ("https://eu.example.net:19132, other" -> eu.example.net, 19132)
+    property var lumenServers: lumenProfiles.profiles.map(function (p) {
+        const raw = String(p.hosts || "").split(",")[0].trim().replace(/^\w+:\/\//, "").replace(/\/.*$/, "")
+        const m = raw.match(/^(.*?)(?::(\d+))?$/)
+        const host = m ? m[1] : raw
+        return { name: p.name || host, host: host, port: m && m[2] ? Number(m[2]) : 19132 }
+    }).filter(s => s.host)
+    property string shortVersionName: activeVersionName ? activeVersionName.replace(/\s*\(.*\)\s*$/, "") : ""
+
     Image {
         id: backgroundArt
         Layout.fillWidth: true
@@ -41,33 +71,51 @@ BaseScreen {
         smooth: sourceSize.height > 256
         fillMode: Image.PreserveAspectCrop
 
-        Rectangle { // Lumen hero backdrop, shown when no custom wallpaper is set
+        Loader { // home of the active launcher design
+            id: hero
             anchors.fill: parent
-            visible: backgroundArt.status !== Image.Ready
-            gradient: Gradient {
-                GradientStop { position: 0.0; color: "#241a52" }
-                GradientStop { position: 0.6; color: "#140f2e" }
-                GradientStop { position: 1.0; color: "#0d0a1c" }
+            sourceComponent: ({ classic: heroClassic, pixel: heroPixel, nebula: heroNebula, orbit: heroOrbit })[window.lumenTheme] || heroSun
+        }
+        Component {
+            id: heroSun
+            HeroSun {
+                playText: playScreen.playText; playSubText: playScreen.playSubText; playEnabled: playScreen.playEnabled
+                modules: playScreen.lumenModules; servers: playScreen.lumenServers; versionName: playScreen.shortVersionName
+                onPlayClicked: playScreen.play()
+                onJoinServer: function (server) { playScreen.play(server) }
             }
-            Column {
-                anchors.centerIn: parent
-                anchors.verticalCenterOffset: -parent.height * 0.2
-                spacing: 8
-                Image {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    source: "qrc:/Resources/lumen-star.svg"
-                    sourceSize.width: 360
-                    sourceSize.height: 360
-                    width: Math.min(backgroundArt.height * 0.26, 180)
-                    height: width
-                }
-                Text {
-                    anchors.horizontalCenter: parent.horizontalCenter
-                    text: qsTr("Welcome to Lumen")
-                    color: "#f3e6bf"
-                    font.pointSize: 20
-                    font.bold: true
-                }
+        }
+        Component {
+            id: heroClassic
+            HeroClassic {
+                playText: playScreen.playText; playSubText: playScreen.playSubText; playEnabled: playScreen.playEnabled
+                modules: playScreen.lumenModules; servers: playScreen.lumenServers; versionName: playScreen.shortVersionName
+                onPlayClicked: playScreen.play()
+                onOpenVersions: mainNavigation.updateIndex(6)
+            }
+        }
+        Component {
+            id: heroPixel
+            HeroPixel {
+                playText: playScreen.playText; playSubText: playScreen.playSubText; playEnabled: playScreen.playEnabled
+                modules: playScreen.lumenModules; servers: playScreen.lumenServers; versionName: playScreen.shortVersionName
+                onPlayClicked: playScreen.play()
+            }
+        }
+        Component {
+            id: heroNebula
+            HeroNebula {
+                playText: playScreen.playText; playSubText: playScreen.playSubText; playEnabled: playScreen.playEnabled
+                modules: playScreen.lumenModules; servers: playScreen.lumenServers; versionName: playScreen.shortVersionName
+                onPlayClicked: playScreen.play()
+            }
+        }
+        Component {
+            id: heroOrbit
+            HeroOrbit {
+                playText: playScreen.playText; playSubText: playScreen.playSubText; playEnabled: playScreen.playEnabled
+                modules: playScreen.lumenModules; servers: playScreen.lumenServers; versionName: playScreen.shortVersionName
+                onPlayClicked: playScreen.play()
             }
         }
 
@@ -194,7 +242,7 @@ BaseScreen {
                 }
 
                 NotifyBanner {
-                    color: "#3b3068"
+                    color: window.lumenLine
                     title: qsTr("Unconfigured Joysticks Found")
                     description: {
                         const ret = GamepadManager.gamepads.filter(gamepad => !gamepad.hasMapping).map(gamepad => gamepad.name)
@@ -348,7 +396,7 @@ BaseScreen {
                     property string releaseUrl: ""
                     property string assetUrl: ""
                     property string latestVersion: ""
-                    color: updater.error ? "#a33" : "#5b3fc4"
+                    color: updater.error ? "#a33" : Qt.darker(window.lumenAccent, 1.4)
                     dismissible: !updater.running
                     title: updater.done ? qsTr("Lumen Launcher updated") : updater.error ? qsTr("Update failed") : updater.running ? qsTr("Updating Lumen Launcher...") : qsTr("Lumen Launcher update available")
                     description: updater.error ? updater.error : (updater.running || updater.done) ? updater.status : qsTr("Version %1 is out (you have %2). One click updates it; your game, worlds and settings in ~/Lumen are kept.").arg(latestVersion).arg(LAUNCHER_VERSION_NAME)
@@ -401,7 +449,7 @@ BaseScreen {
 
                 NotifyBanner {
                     id: banner
-                    color: "#4a3d80"
+                    color: window.lumenLine
                     dismissible: true
                     title: qsTr("Update")
                     visible: false
@@ -516,45 +564,32 @@ BaseScreen {
     }
 /////
 
-    Rectangle {
-        color: "#1b1536"
-        Layout.fillWidth: true
-        height: 66
+    // Play button state; every design's hero draws its own button from these
+    property string playText: (statusChecking || !activeVersionName) ? ""
+        : (activeVersionNeedsDownload ? qsTr("Download and play") : qsTr("Play")).toUpperCase()
+    property string playSubText: statusChecking ? ""
+        : activeVersionName ? ("Minecraft " + activeVersionName).replace(/\s*\(x86(_64)?\)/i, "") : qsTr("Unknown")
+    property bool playEnabled: !(gameLauncher.running || statusChecking || progressbarVisible || updateChecker.active || !activeVersionSupported || !activeVersionName || playStatusNotify.visible)
+    // play; with a server it joins it right away (Bedrock connect link handed to the game)
+    function play(server) {
+        playUri(server ? "minecraft://connect/?serverUrl=" + encodeURIComponent(server.host) + "&serverPort=" + server.port : "")
+    }
+    function playUri(uri) {
+        gameLauncher.uri = uri
+        if (playScreen.activeVersionNeedsDownload) {
+            playDownloadTask.versionCode = getDownloadVersionCode()
+            if (playDownloadTask.versionCode === 0)
+                return
 
-        PlayButton {
-            id: pbutton
-            x: (parent.width - width) / 2
-            y: -height - 28
-            width: Math.min(Math.max(Math.max(implicitWidth, 230), playScreen.width / 4), 320)
-            Layout.alignment: Qt.AlignHCenter
-            text: {
-                if (playScreen.statusChecking || !playScreen.activeVersionName)
-                    return ""
-                return (playScreen.activeVersionNeedsDownload ? qsTr("Download and play") : qsTr("Play")).toUpperCase()
-            }
-            subText: {
-                if (playScreen.statusChecking)
-                    return ""
-                return playScreen.activeVersionName ? ("Minecraft " + playScreen.activeVersionName).replace(/\s*\(x86(_64)?\)/i, "") : qsTr("Unknown")
-            }
-            enabled: !(gameLauncher.running || playScreen.statusChecking || progressbarVisible || updateChecker.active || !playScreen.activeVersionSupported || !playScreen.activeVersionName || playStatusNotify.visible)
-            onClicked: {
-                if (playScreen.activeVersionNeedsDownload) {
-                    playDownloadTask.versionCode = getDownloadVersionCode()
-                    if (playDownloadTask.versionCode === 0)
-                        return
+            progressBar.value = 0
+            const rawname = getRawVersionsName()
+            const partialDownload = !needsFullDownload(rawname)
+            if (partialDownload)
+                apkExtractionTask.versionName = rawname
 
-                    progressBar.value = 0
-                    const rawname = getRawVersionsName()
-                    const partialDownload = !needsFullDownload(rawname)
-                    if (partialDownload)
-                        apkExtractionTask.versionName = rawname
-
-                    playDownloadTask.start(partialDownload)
-                } else {
-                    launchGame()
-                }
-            }
+            playDownloadTask.start(partialDownload)
+        } else {
+            launchGame()
         }
     }
 

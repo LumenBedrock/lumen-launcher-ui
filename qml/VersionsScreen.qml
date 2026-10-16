@@ -57,7 +57,7 @@ ColumnLayout {
         spacing: 10
         Text {
             text: qsTr("PROFILE")
-            color: "#e8b84a"
+            color: window.lumenGlow
             font.pointSize: 9
             font.bold: true
             font.letterSpacing: 2
@@ -111,7 +111,7 @@ ColumnLayout {
         Layout.margins: 16
         Layout.bottomMargin: 6
         text: qsTr("Pick the installed version the Play button launches.")
-        color: "#9a8fd0"
+        color: window.lumenMuted
         font.pointSize: 10
     }
 
@@ -134,9 +134,9 @@ ColumnLayout {
             width: ListView.view.width
             height: 64
             radius: 12
-            color: current ? "#2d2459" : (cardMouse.containsMouse ? "#241c4a" : "#1c1638")
+            color: current ? window.lumenSurfaceHigh : (cardMouse.containsMouse ? window.lumenSurfaceHigh : window.lumenSurface)
             border.width: 1
-            border.color: current ? "#e8b84a" : "#3b3068"
+            border.color: current ? window.lumenGlow : window.lumenLine
             Column {
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
@@ -150,7 +150,7 @@ ColumnLayout {
                 }
                 Text {
                     text: parent.parent.current ? qsTr("Current version") : qsTr("Installed")
-                    color: parent.parent.current ? "#e8b84a" : "#9a8fd0"
+                    color: parent.parent.current ? window.lumenGlow : window.lumenMuted
                     font.pointSize: 9
                 }
             }

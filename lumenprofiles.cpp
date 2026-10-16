@@ -35,6 +35,7 @@ void LumenProfiles::reload() {
     QFile cf(m_dataDir.toLocalFile() + "/lumen_modules.json");
     if (cf.open(QIODevice::ReadOnly))
         m_catalog = QJsonDocument::fromJson(cf.readAll()).object().value("modules").toArray().toVariantList();
+    m_packs = scanAvailablePacks();
     emit changed();
 }
 
@@ -159,6 +160,30 @@ bool LumenProfiles::addProfile(const QString &nameIn, const QString &hostsIn) {
     return ok;
 }
 
+QString LumenProfiles::joinUri(const QString &name) {
+    Range r = findProfile(name);
+    if (r.begin < 0)
+        return QString();
+    QString host;
+    for (int i = r.begin; i < r.end; i++) {
+        QString l = m_lines[i].trimmed();
+        if (l.startsWith("hosts")) {
+            host = l.mid(l.indexOf('=') + 1).split(',').value(0).trimmed();
+            break;
+        }
+    }
+    host.remove(QRegularExpression("^\\w+://")).remove(QRegularExpression("/.*$"));
+    QString port = "19132";
+    int c = host.lastIndexOf(':');
+    if (c > 0 && host.mid(c + 1).toInt() > 0) {
+        port = host.mid(c + 1);
+        host = host.left(c);
+    }
+    if (host.isEmpty())
+        return QString();
+    return "minecraft://connect/?serverUrl=" + QUrl::toPercentEncoding(host) + "&serverPort=" + port;
+}
+
 void LumenProfiles::removeProfile(const QString &name) {
     Range r = findProfile(name);
     if (r.begin < 0)
@@ -277,7 +302,7 @@ QList<PackInfo> scanPacks(const QString &dataDir) {
 }
 } // namespace
 
-QVariantList LumenProfiles::availablePacks() const {
+QVariantList LumenProfiles::scanAvailablePacks() const {
     QVariantList out;
     QStringList seen;
     for (const PackInfo &p : scanPacks(m_dataDir.toLocalFile())) {

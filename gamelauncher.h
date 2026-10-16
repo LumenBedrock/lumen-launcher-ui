@@ -11,11 +11,14 @@ class GameLauncher : public QObject {
     Q_PROPERTY(ProfileInfo* profile READ profile WRITE setProfile)
     Q_PROPERTY(bool crashed READ crashed NOTIFY stateChanged)
     Q_PROPERTY(bool running READ running NOTIFY stateChanged)
+    // Lumen: URI handed to the game on the next start (e.g. minecraft://connect/... to join a server)
+    Q_PROPERTY(QString uri READ uri WRITE setUri)
 
 private:
     QScopedPointer<QProcess> process;
     QScopedPointer<QProcess> fileprocess;
     QString m_gameDir;
+    QString m_uri;
     ProfileInfo* m_profile;
     bool m_crashed = false;
     bool m_gamelogopen = false;
@@ -35,6 +38,10 @@ public:
     QString const& gameDir() { return m_gameDir; }
 
     void setGameDir(QString const& value) { m_gameDir = value; }
+
+    QString const& uri() { return m_uri; }
+
+    void setUri(QString const& value) { m_uri = value; }
 
     ProfileInfo* profile() { return m_profile; }
 

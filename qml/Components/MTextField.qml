@@ -9,15 +9,16 @@ TextField {
     verticalAlignment: TextInput.AlignVCenter
     font.pointSize: 10
     selectByMouse: true
-    selectionColor: "#51a063"
+    selectionColor: window.lumenAccent
     color: "#fff"
-    placeholderTextColor: "#666"
+    placeholderTextColor: "#6f6894"
     opacity: control.enabled ? 1.0 : 0.3
 
     background: Rectangle {
-        border.color: control.hovered ? "#666" : "#4a3d80"
-        color: "#16112e"
-        radius: 2
+        border.color: control.activeFocus || control.hovered ? Qt.lighter(window.lumenAccent, 1.15) : window.lumenLine
+        color: window.lumenAlpha(window.lumenSurfaceLow, 0.8)
+        radius: 10
+        Behavior on border.color { ColorAnimation { duration: 150 } }
 
         FocusBorder {
             visible: control.focus ? control.focusReason == Qt.TabFocusReason || control.focusReason == Qt.BacktabFocusReason : false

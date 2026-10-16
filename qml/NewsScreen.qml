@@ -48,7 +48,7 @@ ColumnLayout {
                     Layout.fillHeight: true
                     Layout.columnSpan: articleImage.ratio > 1.5 ? 2 : 1
                     Layout.rowSpan: articleImage.ratio < 0.5 ? 2 : 1
-                    color: "#1c1638"
+                    color: window.lumenSurface
 
                     Image {
                         id: articleImage

@@ -85,7 +85,7 @@ Item {
 
         Text {
             text: qsTr("Active  (top = highest priority)")
-            color: "#9a8fd0"
+            color: window.lumenMuted
             font.pointSize: 9
             font.letterSpacing: 1
         }
@@ -95,15 +95,15 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Math.max(rowH + 2 * pad, root.active.length * (rowH + gap) - gap + 2 * pad)
             radius: 8
-            color: "#16112e"
+            color: window.lumenSurfaceLow
             border.width: 1
-            border.color: root.dragging && root.dropIndex >= 0 ? "#e8b84a" : "#3b3068"
+            border.color: root.dragging && root.dropIndex >= 0 ? window.lumenGlow : window.lumenLine
 
             Text {
                 visible: root.active.length === 0
                 anchors.centerIn: parent
                 text: qsTr("Drop packs here. Empty = vanilla textures.")
-                color: "#7d73ad"
+                color: window.lumenMuted
                 font.pointSize: 9
             }
 
@@ -122,12 +122,12 @@ Item {
                         width: rowsCol.width
                         height: root.rowH
                         radius: 6
-                        color: rowMouse.containsMouse ? "#2d2459" : "#241c4a"
+                        color: rowMouse.containsMouse ? window.lumenSurfaceHigh : window.lumenSurfaceHigh
                         opacity: root.dragging && root.dragFromActive && root.dragIndex === row.index ? 0.35 : 1
                         Rectangle { // accent edge, like the in-game rows
                             width: 2
                             height: parent.height
-                            color: "#7a5af0"
+                            color: window.lumenAccent
                         }
                         Text {
                             id: grip
@@ -135,7 +135,7 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: 10
                             text: "⋮⋮"
-                            color: "#7d73ad"
+                            color: window.lumenMuted
                             font.pointSize: 9
                         }
                         Text {
@@ -156,7 +156,7 @@ Item {
                             anchors.right: parent.right
                             anchors.rightMargin: 12
                             text: "#" + (row.index + 1)
-                            color: "#e8b84a"
+                            color: window.lumenGlow
                             font.pointSize: 10
                         }
                         MouseArea {
@@ -189,7 +189,7 @@ Item {
                 width: parent.width - 2 * root.pad
                 height: 3
                 radius: 1
-                color: "#e8b84a"
+                color: window.lumenGlow
                 y: root.pad + root.dropIndex * (root.rowH + root.gap) - root.gap / 2 - 1
             }
         }
@@ -197,7 +197,7 @@ Item {
         Text {
             Layout.topMargin: 4
             text: qsTr("Available")
-            color: "#9a8fd0"
+            color: window.lumenMuted
             font.pointSize: 9
             font.letterSpacing: 1
         }
@@ -207,9 +207,9 @@ Item {
             Layout.fillWidth: true
             Layout.preferredHeight: Math.max(root.rowH + 2 * root.pad, availFlow.height + 2 * root.pad)
             radius: 8
-            color: "#16112e"
+            color: window.lumenSurfaceLow
             border.width: 1
-            border.color: root.dragging && root.dragFromActive && root.dropIndex < 0 ? "#e8b84a" : "#3b3068"
+            border.color: root.dragging && root.dragFromActive && root.dropIndex < 0 ? window.lumenGlow : window.lumenLine
 
             Column {
                 id: availFlow
@@ -227,7 +227,7 @@ Item {
                         width: availFlow.width
                         height: visible ? root.rowH : 0
                         radius: 6
-                        color: chipMouse.containsMouse ? "#2d2459" : "#201a42"
+                        color: chipMouse.containsMouse ? window.lumenSurfaceHigh : window.lumenSurface
                         opacity: root.dragging && !root.dragFromActive && root.dragName === chip.modelData ? 0.35 : 1
                         Text {
                             id: chipGrip
@@ -235,7 +235,7 @@ Item {
                             anchors.left: parent.left
                             anchors.leftMargin: 10
                             text: "⋮⋮"
-                            color: "#7d73ad"
+                            color: window.lumenMuted
                             font.pointSize: 9
                         }
                         Text {
@@ -284,9 +284,9 @@ Item {
         width: ghostText.implicitWidth + 24
         height: 28
         radius: 6
-        color: "#7a5af0"
+        color: window.lumenAccent
         border.width: 1
-        border.color: "#e8b84a"
+        border.color: window.lumenGlow
         opacity: 0.92
         Text {
             id: ghostText

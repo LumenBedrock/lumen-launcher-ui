@@ -6,7 +6,18 @@ Rectangle {
     property string subtitle: ""
     property alias content: container.data
 
-    color: "#1b1536"
+    // glass bar over the space background
+    color: window.lumenAlpha(window.lumenSurface, 0.65)
+    Rectangle {
+        anchors.bottom: parent.bottom
+        width: parent.width
+        height: 1
+        gradient: Gradient {
+            orientation: Gradient.Horizontal
+            GradientStop { position: 0.0; color: window.lumenAlpha(window.lumenAccent, 0.35) }
+            GradientStop { position: 1.0; color: window.lumenAlpha(window.lumenAccent, 0) }
+        }
+    }
     Layout.fillWidth: true
     Layout.minimumHeight: contents.height
     z: 2
@@ -22,16 +33,18 @@ Rectangle {
             text: title
             color: "#fff"
             font {
-                bold: true
-                pointSize: 12
+                family: "Sora"
+                weight: Font.Bold
+                pointSize: 13
+                letterSpacing: 1
                 capitalization: Font.AllUppercase
             }
             Text {
                 anchors.top: parent.bottom
                 anchors.left: parent.left
                 text: subtitle
-                font.pointSize: 8
-                color: "#999"
+                font.pointSize: 8.5
+                color: "#a39cbd"
             }
         }
 

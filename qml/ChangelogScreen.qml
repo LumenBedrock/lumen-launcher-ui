@@ -35,7 +35,7 @@ BaseScreen {
     Rectangle {
         Layout.fillWidth: true
         Layout.minimumHeight: pbutton.height + 10 * 2
-        color: "#1c1638"
+        color: window.lumenSurface
         MButton {
             id: pbutton
             text: qsTr("Continue")

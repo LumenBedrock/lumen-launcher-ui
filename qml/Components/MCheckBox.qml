@@ -12,9 +12,10 @@ T.CheckBox {
         implicitWidth: 18
         implicitHeight: 18
         anchors.verticalCenter: parent.verticalCenter
-        radius: 2
-        color: control.checked ? (control.hovered ? "#7a5af0" : "#6a4be0") : "#16112e"
-        border.color: control.down ? "#888" : (control.hovered ? "#666" : "#4a3d80")
+        radius: 5
+        color: control.checked ? (control.hovered ? Qt.lighter(window.lumenAccent, 1.1) : window.lumenAccent) : window.lumenAlpha(window.lumenSurfaceLow, 0.8)
+        border.color: control.checked || control.hovered ? Qt.lighter(window.lumenAccent, 1.15) : window.lumenLine
+        Behavior on color { ColorAnimation { duration: 150 } }
 
         Canvas {
             anchors.centerIn: parent

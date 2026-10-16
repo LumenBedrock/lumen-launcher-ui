@@ -4,5 +4,5 @@ import QtQuick.Layouts
 Rectangle {
     Layout.fillWidth: true
     height: 2
-    color: "#3b3068"
+    color: window.lumenLine
 }
