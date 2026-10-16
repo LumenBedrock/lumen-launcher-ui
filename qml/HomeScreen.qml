@@ -20,6 +20,7 @@ BaseScreen {
     property bool isVersionsInitialized: false
     property bool progressbarVisible: playDownloadTask.active || apkExtractionTask.active || updateManager.active
     property bool hasUpdate: false
+    signal openServerPage(string key)
     // quick join needs a signed-in Google account (or stored credentials)
     readonly property bool loggedIn: googleLoginHelper != null && (googleLoginHelper.account != null || googleLoginHelper.hasEncryptedCredentials)
     property string updateDownloadUrl: ""
@@ -61,7 +62,7 @@ BaseScreen {
         const raw = String(p.hosts || "").split(",")[0].trim().replace(/^\w+:\/\//, "").replace(/\/.*$/, "")
         const m = raw.match(/^(.*?)(?::(\d+))?$/)
         const host = m ? m[1] : raw
-        return { name: p.name || host, host: host, port: m && m[2] ? Number(m[2]) : 19132 }
+        return { key: p.key, name: p.name || host, host: host, port: m && m[2] ? Number(m[2]) : 19132 }
     }).filter(s => s.host)
     property string shortVersionName: activeVersionName ? activeVersionName.replace(/\s*\(.*\)\s*$/, "") : ""
 
@@ -85,6 +86,11 @@ BaseScreen {
                 modules: playScreen.lumenModules; servers: playScreen.lumenServers; versionName: playScreen.shortVersionName
                 onPlayClicked: playScreen.play()
                 onJoinServer: function (server) { playScreen.play(server) }
+                editLocked: gameLauncher.running
+                similarOf: function (key) { return lumenProfiles.similarTo(key) }
+                onRemoveServers: function (keys) { lumenProfiles.removeProfiles(keys) }
+                onRenameServer: function (key, newName) { lumenProfiles.renameProfile(key, newName) }
+                onEditServer: function (key) { playScreen.openServerPage(key) }
             }
         }
         Component {

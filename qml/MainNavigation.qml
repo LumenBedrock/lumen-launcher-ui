@@ -8,6 +8,7 @@ import "Components"
 Item {
     id: mainNavigation
     property int currentIndex: 0
+    property string serversFocus: "" // server card to open when the Servers page is shown
     readonly property bool joinSignedIn: googleLoginHelperInstance.account != null || googleLoginHelperInstance.hasEncryptedCredentials
     property bool useWideLayout: window.width > 720
     readonly property var pages: [
@@ -73,12 +74,17 @@ Item {
             hasUpdate: window.hasUpdate
             updateDownloadUrl: window.updateDownloadUrl
             isVersionsInitialized: window.isVersionsInitialized
+            onOpenServerPage: function (key) {
+                mainNavigation.serversFocus = key
+                mainNavigation.updateIndex(7)
+            }
         }
     }
 
     Component {
         id: serversPage
         ServersScreen {
+            focusKey: mainNavigation.serversFocus
             joinAllowed: joinSignedIn
             onJoinRequested: function (uri) { joinQueued(uri) }
         }

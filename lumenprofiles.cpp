@@ -1,6 +1,7 @@
 #include "lumenprofiles.h"
 
 #include <QDir>
+#include <algorithm>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -41,10 +42,15 @@ void LumenProfiles::reload() {
 
 LumenProfiles::Range LumenProfiles::findProfile(const QString &name) const {
     Range r;
+    // unnamed profiles are addressed by their position: "#unnamed:<n>" (see profiles(), "key")
+    const bool byIndex = name.startsWith("#unnamed:");
+    const int want = byIndex ? name.mid(9).toInt() : -1;
+    int seen = 0;
     const QString header = "[profile " + name + "]";
     for (int i = 0; i < m_lines.size(); i++) {
         if (r.begin < 0) {
-            if (m_lines[i].trimmed() == header)
+            const QString t = m_lines[i].trimmed();
+            if (byIndex ? (t.startsWith("[profile ") && t.endsWith(']') && seen++ == want) : t == header)
                 r.begin = i;
         } else if (m_lines[i].trimmed().startsWith('[')) {
             r.end = i;
@@ -61,8 +67,15 @@ QVariantList LumenProfiles::profiles() const {
     QVariantMap cur;
     QVariantList mods, vals;
     bool inProfile = false;
+    int index = 0;
     auto flush = [&]() {
         if (inProfile) {
+            if (cur["name"].toString().isEmpty()) {
+                QString h = cur["hosts"].toString().split(',').value(0).trimmed();
+                cur["label"] = h.isEmpty() ? QStringLiteral("(unnamed)") : h;
+            } else {
+                cur["label"] = cur["name"];
+            }
             cur["modules"] = mods;
             cur["values"] = vals;
             out.append(cur);
@@ -79,6 +92,9 @@ QVariantList LumenProfiles::profiles() const {
             if (s.startsWith("[profile ") && s.endsWith(']')) {
                 inProfile = true;
                 cur["name"] = s.mid(9, s.size() - 10);
+                // "key" addresses the profile in every other call; "label" is what the page shows
+                cur["key"] = cur["name"].toString().isEmpty() ? "#unnamed:" + QString::number(index) : cur["name"];
+                index++;
                 cur["hosts"] = QString();
                 cur["packs"] = QString();
                 cur["packList"] = QStringList();
@@ -182,6 +198,91 @@ QString LumenProfiles::joinUri(const QString &name) {
     if (host.isEmpty())
         return QString();
     return "minecraft://connect/?serverUrl=" + QUrl::toPercentEncoding(host) + "&serverPort=" + port;
+}
+
+namespace {
+// "https://Play.Example.net:19132/x" -> "play.example.net"
+QString normHost(QString h) {
+    h = h.trimmed().toLower();
+    h.remove(QRegularExpression("^\\w+://")).remove(QRegularExpression("/.*$"));
+    int c = h.lastIndexOf(':');
+    if (c > 0 && h.mid(c + 1).toInt() > 0)
+        h = h.left(c);
+    return h;
+}
+// last two labels ("geo.hivebedrock.cloud" -> "hivebedrock.cloud"); an IPv4 address is its own network (first three octets)
+QString networkOf(const QString &h) {
+    static const QRegularExpression ip("^(\\d+\\.\\d+\\.\\d+)\\.\\d+$");
+    QRegularExpressionMatch m = ip.match(h);
+    if (m.hasMatch())
+        return m.captured(1) + ".*";
+    QStringList parts = h.split('.');
+    return parts.size() <= 2 ? h : parts.mid(parts.size() - 2).join('.');
+}
+} // namespace
+
+QVariantList LumenProfiles::similarTo(const QString &key) const {
+    const QVariantList all = profiles();
+    QString host;
+    for (const QVariant &v : all) {
+        QVariantMap m = v.toMap();
+        if (m["key"].toString() == key)
+            host = normHost(m["hosts"].toString().split(',').value(0));
+    }
+    QVariantList out;
+    if (host.isEmpty())
+        return out;
+    for (const QVariant &v : all) {
+        QVariantMap m = v.toMap();
+        if (m["key"].toString() == key)
+            continue;
+        const QString h = normHost(m["hosts"].toString().split(',').value(0));
+        if (h.isEmpty())
+            continue;
+        QVariantMap r;
+        r["key"] = m["key"];
+        r["label"] = m["label"];
+        r["host"] = h;
+        if (h == host)
+            r["relation"] = "same address";
+        else if (networkOf(h) == networkOf(host))
+            r["relation"] = "same network";
+        else
+            continue;
+        out.append(r);
+    }
+    return out;
+}
+
+void LumenProfiles::removeProfiles(const QStringList &keys) {
+    // resolve every range first, then cut from the bottom so positional keys stay valid
+    QList<Range> ranges;
+    for (const QString &k : keys) {
+        Range r = findProfile(k);
+        if (r.begin >= 0)
+            ranges << r;
+    }
+    std::sort(ranges.begin(), ranges.end(), [](const Range &a, const Range &b) { return a.begin > b.begin; });
+    for (const Range &r : ranges)
+        for (int i = r.end - 1; i >= r.begin; i--)
+            m_lines.removeAt(i);
+    if (!ranges.isEmpty()) {
+        write();
+        emit changed();
+    }
+}
+
+bool LumenProfiles::renameProfile(const QString &key, const QString &newNameIn) {
+    const QString newName = newNameIn.trimmed();
+    if (newName.isEmpty() || newName.contains(']') || newName.contains('\n') || findProfile(newName).begin >= 0)
+        return false;
+    Range r = findProfile(key);
+    if (r.begin < 0)
+        return false;
+    m_lines[r.begin] = "[profile " + newName + "]";
+    write();
+    emit changed();
+    return true;
 }
 
 void LumenProfiles::removeProfile(const QString &name) {

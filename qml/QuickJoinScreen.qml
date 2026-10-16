@@ -52,7 +52,7 @@ ColumnLayout {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
                         anchors.leftMargin: 16
-                        text: modelData.name
+                        text: modelData.label
                         color: "#fff"
                         font.pointSize: 13
                         font.bold: true
@@ -83,7 +83,7 @@ ColumnLayout {
                         anchors.fill: parent
                         hoverEnabled: true
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: { var u = store.joinUri(modelData.name); if (u) page.joinRequested(u) }
+                        onClicked: { var u = store.joinUri(modelData.key); if (u) page.joinRequested(u) }
                     }
                 }
             }

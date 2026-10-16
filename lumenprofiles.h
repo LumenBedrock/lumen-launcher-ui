@@ -33,6 +33,9 @@ public:
     Q_INVOKABLE void reload();
     Q_INVOKABLE bool addProfile(const QString &name, const QString &hosts);
     Q_INVOKABLE QString joinUri(const QString &name); // minecraft://connect link for the server, empty if unknown
+    Q_INVOKABLE QVariantList similarTo(const QString &key) const; // [{key, label, relation}] profiles on the same address / network
+    Q_INVOKABLE void removeProfiles(const QStringList &keys);
+    Q_INVOKABLE bool renameProfile(const QString &key, const QString &newName); // false if the name is empty, invalid or taken
     Q_INVOKABLE void removeProfile(const QString &name);
     Q_INVOKABLE void setHosts(const QString &name, const QString &hosts);
     Q_INVOKABLE void setModule(const QString &name, const QString &module, bool on);

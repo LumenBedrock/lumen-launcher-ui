@@ -11,8 +11,10 @@ ColumnLayout {
     // Which dropdowns are open, kept here because every edit rebuilds the cards
     property var openState: ({})
     signal joinRequested(string uri)
+    property string focusKey: "" // open this server's card on start
     property bool joinAllowed: true // false while no Google account is signed in
     Component.onCompleted: { // headless test hook: open the first server's dropdowns
+        if (focusKey !== "") setOpen(focusKey + "#card", true)
         if (LUMEN_START_SET && store.profiles.length > 0) {
             var n = store.profiles[0].name
             setOpen(n + "#card", true)
@@ -113,9 +115,9 @@ ColumnLayout {
                 delegate: Rectangle {
                     id: card
                     required property var modelData
-                    property bool cardOpen: page.isOpen(card.modelData.name + "#card")
-                    property bool modulesOpen: page.isOpen(card.modelData.name + "#modules")
-                    property bool packsOpen: page.isOpen(card.modelData.name + "#packs")
+                    property bool cardOpen: page.isOpen(card.modelData.key + "#card")
+                    property bool modulesOpen: page.isOpen(card.modelData.key + "#modules")
+                    property bool packsOpen: page.isOpen(card.modelData.key + "#packs")
                     // lookups for the catalogue-driven module editor
                     property var valueMap: {
                         var m = {}
@@ -152,7 +154,7 @@ ColumnLayout {
                             Text {
                                 id: srvName
                                 anchors.verticalCenter: parent.verticalCenter
-                                text: card.modelData.name
+                                text: card.modelData.label
                                 color: "#fff"
                                 font.pointSize: 13
                                 font.bold: true
@@ -179,7 +181,7 @@ ColumnLayout {
                             MouseArea {
                                 anchors.fill: parent
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: page.setOpen(card.modelData.name + "#card", !card.cardOpen)
+                                onClicked: page.setOpen(card.modelData.key + "#card", !card.cardOpen)
                             }
                         }
 
@@ -194,12 +196,12 @@ ColumnLayout {
                             MButton {
                                 text: page.joinAllowed ? qsTr("Join") : qsTr("Sign in to join")
                                 enabled: page.joinAllowed && !page.locked
-                                onClicked: { var u = store.joinUri(card.modelData.name); if (u) page.joinRequested(u) }
+                                onClicked: { var u = store.joinUri(card.modelData.key); if (u) page.joinRequested(u) }
                             }
                             Item { Layout.fillWidth: true }
                             MButton {
                                 text: qsTr("Remove this server")
-                                onClicked: store.removeProfile(card.modelData.name)
+                                onClicked: store.removeProfile(card.modelData.key)
                             }
                         }
 
@@ -207,13 +209,13 @@ ColumnLayout {
                             Layout.fillWidth: true
                             text: card.modelData.hosts
                             placeholderText: qsTr("Address(es), separated by commas")
-                            onEditingFinished: if (text.trim() !== card.modelData.hosts) store.setHosts(card.modelData.name, text)
+                            onEditingFinished: if (text.trim() !== card.modelData.hosts) store.setHosts(card.modelData.key, text)
                         }
 
                         MCheckBox {
                             text: qsTr("Change texture packs here")
                             checked: card.modelData.setPacks
-                            onClicked: store.setPacksEnabled(card.modelData.name, checked)
+                            onClicked: store.setPacksEnabled(card.modelData.key, checked)
                         }
 
                         // Texture packs dropdown (folded by default, only when this server has its own stack)
@@ -246,7 +248,7 @@ ColumnLayout {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: page.setOpen(card.modelData.name + "#packs", !card.packsOpen)
+                                onClicked: page.setOpen(card.modelData.key + "#packs", !card.packsOpen)
                             }
                         }
 
@@ -262,12 +264,12 @@ ColumnLayout {
                                         Layout.fillWidth: true
                                         active: card.modelData.packList
                                         available: store.availablePacks.map(function (p) { return p.name })
-                                        onStackChanged: list => store.setPacks(card.modelData.name, list)
+                                        onStackChanged: list => store.setPacks(card.modelData.key, list)
                                     }
                                     MButton {
                                         text: qsTr("Copy current stack")
                                         implicitHeight: 30
-                                        onClicked: store.setPacks(card.modelData.name, store.currentPackNames())
+                                        onClicked: store.setPacks(card.modelData.key, store.currentPackNames())
                                     }
                                 }
                             }
@@ -302,7 +304,7 @@ ColumnLayout {
                                 anchors.fill: parent
                                 hoverEnabled: true
                                 cursorShape: Qt.PointingHandCursor
-                                onClicked: page.setOpen(card.modelData.name + "#modules", !card.modulesOpen)
+                                onClicked: page.setOpen(card.modelData.key + "#modules", !card.modulesOpen)
                             }
                         }
 
@@ -320,7 +322,7 @@ ColumnLayout {
                                         delegate: Column {
                                             id: modBlock
                                             required property var modelData
-                                            property bool open: page.isOpen(card.modelData.name + "#mod#" + modBlock.modelData.name)
+                                            property bool open: page.isOpen(card.modelData.key + "#mod#" + modBlock.modelData.name)
                                             property string modName: modBlock.modelData.name
                                             property int setCount: {
                                                 var n = card.modMap[modName] !== undefined ? 1 : 0
@@ -360,7 +362,7 @@ ColumnLayout {
                                                     anchors.rightMargin: modBlock.modelData.hasSwitch ? 120 : 0
                                                     hoverEnabled: true
                                                     cursorShape: Qt.PointingHandCursor
-                                                    onClicked: page.setOpen(card.modelData.name + "#mod#" + modBlock.modName, !modBlock.open)
+                                                    onClicked: page.setOpen(card.modelData.key + "#mod#" + modBlock.modName, !modBlock.open)
                                                 }
                                                 Row {
                                                     visible: modBlock.modelData.hasSwitch
@@ -372,12 +374,12 @@ ColumnLayout {
                                                         visible: card.modMap[modBlock.modName] !== undefined
                                                         implicitHeight: 26
                                                         text: qsTr("Use normal")
-                                                        onClicked: store.clearModule(card.modelData.name, modBlock.modName)
+                                                        onClicked: store.clearModule(card.modelData.key, modBlock.modName)
                                                     }
                                                     MCheckBox {
                                                         text: qsTr("On")
                                                         checked: card.modMap[modBlock.modName] !== undefined ? card.modMap[modBlock.modName] : modBlock.modelData.enabled
-                                                        onClicked: store.setModule(card.modelData.name, modBlock.modName, checked)
+                                                        onClicked: store.setModule(card.modelData.key, modBlock.modName, checked)
                                                     }
                                                 }
                                             }
@@ -407,7 +409,7 @@ ColumnLayout {
                                                                     Layout.fillWidth: true
                                                                     text: setRow.modelData.label
                                                                     checked: setRow.val !== 0
-                                                                    onClicked: store.setValue(card.modelData.name, setRow.key, checked ? 1 : 0)
+                                                                    onClicked: store.setValue(card.modelData.key, setRow.key, checked ? 1 : 0)
                                                                 }
                                                                 Text {
                                                                     visible: setRow.modelData.kind !== "toggle"
@@ -448,7 +450,7 @@ ColumnLayout {
                                                                     to: setRow.modelData.max
                                                                     stepSize: setRow.modelData.step
                                                                     value: setRow.val
-                                                                    onPressedChanged: if (!pressed) store.setValue(card.modelData.name, setRow.key, value)
+                                                                    onPressedChanged: if (!pressed) store.setValue(card.modelData.key, setRow.key, value)
                                                                 }
                                                                 Text {
                                                                     visible: setRow.modelData.kind === "slider"
@@ -470,7 +472,7 @@ ColumnLayout {
                                                                             required property int index
                                                                             implicitHeight: 26
                                                                             text: (index === Math.round(setRow.val) ? "● " : "") + modelData
-                                                                            onClicked: store.setValue(card.modelData.name, setRow.key, index)
+                                                                            onClicked: store.setValue(card.modelData.key, setRow.key, index)
                                                                         }
                                                                     }
                                                                 }
@@ -483,14 +485,14 @@ ColumnLayout {
                                                                     placeholderText: setRow.modelData.kind === "color" ? "#RRGGBB" : qsTr("key code")
                                                                     onEditingFinished: {
                                                                         var v = setRow.modelData.kind === "color" ? parseInt(text.replace("#", ""), 16) : parseInt(text)
-                                                                        if (!isNaN(v)) store.setValue(card.modelData.name, setRow.key, v)
+                                                                        if (!isNaN(v)) store.setValue(card.modelData.key, setRow.key, v)
                                                                     }
                                                                 }
                                                                 MButton {
                                                                     visible: setRow.has
                                                                     implicitHeight: 26
                                                                     text: qsTr("Use normal")
-                                                                    onClicked: store.clearValue(card.modelData.name, setRow.key)
+                                                                    onClicked: store.clearValue(card.modelData.key, setRow.key)
                                                                 }
                                                             }
                                                         }
@@ -525,12 +527,12 @@ ColumnLayout {
                                         Layout.fillWidth: true
                                         text: parent.modelData.name
                                         checked: parent.modelData.on
-                                        onClicked: store.setModule(card.modelData.name, parent.modelData.name, checked)
+                                        onClicked: store.setModule(card.modelData.key, parent.modelData.name, checked)
                                     }
                                     MButton {
                                         text: qsTr("Use normal")
                                         implicitHeight: 28
-                                        onClicked: store.clearModule(card.modelData.name, parent.modelData.name)
+                                        onClicked: store.clearModule(card.modelData.key, parent.modelData.name)
                                     }
                                 }
                             }
@@ -553,13 +555,13 @@ ColumnLayout {
                                         onEditingFinished: {
                                             var v = parseFloat(text)
                                             if (!isNaN(v) && v !== parent.modelData.value)
-                                                store.setValue(card.modelData.name, parent.modelData.key, v)
+                                                store.setValue(card.modelData.key, parent.modelData.key, v)
                                         }
                                     }
                                     MButton {
                                         text: qsTr("Use normal")
                                         implicitHeight: 28
-                                        onClicked: store.clearValue(card.modelData.name, parent.modelData.key)
+                                        onClicked: store.clearValue(card.modelData.key, parent.modelData.key)
                                     }
                                 }
                             }
