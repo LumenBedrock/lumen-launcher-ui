@@ -84,7 +84,8 @@ int main(int argc, char *argv[])
         uiFont.setPointSizeF(app.font().pointSizeF());
         app.setFont(uiFont);
     }
-    QGuiApplication::setDesktopFileName("lumen-launcher");
+    // Flatpak: the desktop file is named after the app id, so Wayland needs that as the app id to find the icon
+    QGuiApplication::setDesktopFileName(qEnvironmentVariableIsSet("FLATPAK_ID") ? qEnvironmentVariable("FLATPAK_ID") : QStringLiteral("lumen-launcher"));
     QTranslator translator;
     if (translator.load(QLocale(), QLatin1String("mcpelauncher"), QLatin1String("_"), QLatin1String(":/translations"))) {
         app.installTranslator(&translator);
