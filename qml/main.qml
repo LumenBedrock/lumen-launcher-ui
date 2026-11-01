@@ -168,8 +168,12 @@ Window {
         return versions;
     }
 
+    // Game versions the Lumen client can hook; every other version is hidden. Keep in sync with kSupportedVersionCodes in the client's main.cpp.
+    readonly property var lumenSupportedVersions: ["1.26.50.4"]
+
     function updateAvailableArchivalVersions() {
-        versionManagerInstance.availableArchivalVersions = mergeVersions(versionManagerInstance._archival.slice(), versionManagerInstance.extraVersions);
+        versionManagerInstance.availableArchivalVersions = mergeVersions(versionManagerInstance._archival.slice(), versionManagerInstance.extraVersions)
+            .filter(v => lumenSupportedVersions.indexOf(v.versionName) >= 0);
     }
 
     VersionManager {

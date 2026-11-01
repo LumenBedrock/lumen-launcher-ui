@@ -369,7 +369,8 @@ BaseScreen {
                 }
 
                 NotifyBanner {
-                    visible: updateManager.hasUpdate && !(progressbarVisible || updateChecker.active) && launcherSettings.showNotifications
+                    visible: false // Lumen: upstream DRM-mod banner, pointless for the fixed Lumen version list
+                    property bool _unused: updateManager.hasUpdate && !(progressbarVisible || updateChecker.active) && launcherSettings.showNotifications
                     title: qsTr("DRM Update Available")
                     description: qsTr("To support additional versions up to %1.").arg(updateManager.update.version)
                     actionText: updateManager.update.url ? qsTr("Download") : qsTr("Activate")

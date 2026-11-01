@@ -142,6 +142,7 @@ Popup {
                                                      data = []
                                                      versionsmodel.clear()
                                                      var abis = googleLoginHelper.getAbis(launcherSettings.showUnsupported)
+                                                     var unsup = function (v) { return window.lumenSupportedVersions.indexOf(v) < 0 ? qsTr(", unsupported by Lumen") : "" }
                                                      var append = function (obj) {
                                                          data.push(obj)
                                                          versionsmodel.append({
@@ -152,7 +153,7 @@ Popup {
                                                          var support = checkGooglePlayLatestSupport()
                                                          var latest = support ? playVerChannel.latestVersion : launcherLatestVersion().versionName
                                                          append({
-                                                                    "name": qsTr("Latest %1 (%2)").arg((latest.length === 0 ? qsTr("version") : latest)).arg((support ? qsTr("Google Play") : qsTr("compatible"))),
+                                                                    "name": qsTr("Latest %1 (%2)").arg((latest.length === 0 ? qsTr("version") : latest)).arg((support ? qsTr("Google Play") : qsTr("compatible")) + unsup(latest)),
                                                                     "versionType": ProfileInfo.LATEST_GOOGLE_PLAY
                                                                 })
                                                      }
@@ -161,7 +162,7 @@ Popup {
                                                              for (var k = 0; k < versions[i].archs.length; k++) {
                                                                  if (versions[i].archs[k] == abis[j]) {
                                                                      append({
-                                                                                "name": qsTr("%1 (installed, %2)").arg(versions[i].versionName).arg(versions[i].archs[k]),
+                                                                                "name": qsTr("%1 (installed, %2%3)").arg(versions[i].versionName).arg(versions[i].archs[k]).arg(unsup(versions[i].versionName)),
                                                                                 "versionType": ProfileInfo.LOCKED_CODE,
                                                                                 "obj": versions[i],
                                                                                 "arch": versions[i].archs[k]
