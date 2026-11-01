@@ -226,6 +226,7 @@ int main(int argc, char *argv[])
     // Test hooks (headless screenshots): LUMEN_START_PAGE=<sidebar index>, LUMEN_SCREENSHOT=<png path>
     engine.rootContext()->setContextProperty("LUMEN_START_PAGE", qEnvironmentVariableIntValue("LUMEN_START_PAGE", nullptr) );
     engine.rootContext()->setContextProperty("LUMEN_START_SET", qEnvironmentVariableIsSet("LUMEN_START_PAGE"));
+    engine.rootContext()->setContextProperty("LUMEN_X11_NVIDIA", qEnvironmentVariableIsSet("LUMEN_X11_NVIDIA")); // set by the Flatpak start script
     engine.load(QUrl(parser.isSet(requestGoogleCredentialsOption) ? QStringLiteral("qrc:/qml/RequestGoogleCredentials.qml") : QStringLiteral("qrc:/qml/main.qml")));
     if (!engine.rootObjects().isEmpty() && qEnvironmentVariableIsSet("LUMEN_TEST_DRAG")) {
         // headless test: LUMEN_TEST_DRAG="x1,y1,x2,y2" presses at (x1,y1), drags to (x2,y2) and releases

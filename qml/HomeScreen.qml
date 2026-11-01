@@ -276,6 +276,14 @@ BaseScreen {
 
                 NotifyBanner {
                     color: "#832"
+                    dismissible: false
+                    visible: LUMEN_X11_NVIDIA && launcherSettings.showNotifications
+                    title: qsTr("NVIDIA card on an X11 desktop")
+                    description: qsTr("Minecraft 1.26.40 and newer freezes a few seconds after start on NVIDIA cards under X11. Log out and pick a Wayland session on the login screen (on Linux Mint: install gnome-session and choose \"GNOME on Wayland\"), then start the game again.")
+                }
+
+                NotifyBanner {
+                    color: "#832"
                     title: qsTr("Play Version is behind")
                     description: qsTr("Google Play Version Channel is behind. Got %1. Expected %2.").arg(playVerChannel.latestVersion).arg(launcherLatestVersionBase().versionName)
                     visible: (googleLoginHelper.account !== null) && launcherLatestVersionBase().versionCode > playVerChannel.latestVersionCode && launcherSettings.showNotifications
