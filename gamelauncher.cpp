@@ -214,6 +214,7 @@ void GameLauncher::start(bool disableGameLog, QString arch, bool hasVerifiedLice
                     executable = customExecutable;
                 }
                 process->start(executable, args);
+                m_presence.start();
                 emit stateChanged();
                 emit logAppended(QString::fromStdString(getCommandLine(executable)) + "\n");
                 return;
@@ -289,6 +290,7 @@ void GameLauncher::handleFinished(int exitCode, QProcess::ExitStatus exitStatus)
         break;
     }
     process.reset();
+    m_presence.stop();
     if (!m_disableGameLog)
         emit logAppended("\n" + msg);
     emit stateChanged();
@@ -309,6 +311,7 @@ void GameLauncher::kill() {
         process->kill();
         process->waitForFinished();
         process.reset();
+        m_presence.stop();
         emit stateChanged();
     }
 }

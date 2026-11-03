@@ -110,6 +110,12 @@ ColumnLayout {
     }
 
     MCheckBox {
+        text: qsTr("Show \"Playing Lumen\" in Discord")
+        Component.onCompleted: checked = launcherSettings.discordPresence
+        onCheckedChanged: launcherSettings.discordPresence = checked
+    }
+
+    MCheckBox {
         text: qsTr("ChromeOS Mode")
         Component.onCompleted: checked = launcherSettings.chromeOSMode
         onCheckedChanged: launcherSettings.chromeOSMode = checked

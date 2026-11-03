@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QProcess>
 #include "profilemanager.h"
+#include "discordpresence.h"
 
 class GameLauncher : public QObject {
     Q_OBJECT
@@ -17,6 +18,7 @@ class GameLauncher : public QObject {
 private:
     QScopedPointer<QProcess> process;
     QScopedPointer<QProcess> fileprocess;
+    DiscordPresence m_presence;
     QString m_gameDir;
     QString m_uri;
     ProfileInfo* m_profile;
