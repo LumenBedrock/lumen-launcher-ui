@@ -141,7 +141,8 @@ if (NOT APPLE)
 endif()
 include(CPackSettings.cmake)
 
-# Lumen: Discord application ID for Rich Presence (-DLUMEN_DISCORD_APP_ID=...); empty disables presence
+# Lumen: Discord application ID for Rich Presence (public); -DLUMEN_DISCORD_APP_ID= (empty) disables it
+set(LUMEN_DISCORD_APP_ID "1560298727162257438" CACHE STRING "Discord application ID")
 if(LUMEN_DISCORD_APP_ID)
     target_compile_definitions(${PROJECT_NAME} PRIVATE LUMEN_DISCORD_APP_ID="${LUMEN_DISCORD_APP_ID}")
 endif()
