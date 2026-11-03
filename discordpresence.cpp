@@ -3,6 +3,7 @@
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QDir>
+#include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QSettings>
@@ -21,7 +22,36 @@ bool DiscordPresence::send(int opcode, const QByteArray& json) {
     return socket.write(frame) == frame.size() && socket.waitForBytesWritten(500);
 }
 
-void DiscordPresence::start() {
+DiscordPresence::DiscordPresence(QObject* parent) : QObject(parent) {
+    poll.setInterval(5000);
+    connect(&poll, &QTimer::timeout, this, &DiscordPresence::checkServer);
+}
+
+void DiscordPresence::setActivity() {
+    // Only a friendly name leaves the machine, never the raw server address.
+    QString host = lastServer.toLower(), state;
+    if (host.contains("hive")) state = "on The Hive";
+    else if (host.contains("swim")) state = "on Swim";
+    else if (!host.isEmpty()) state = "Multiplayer";
+    QJsonObject activity{{"details", "Playing Lumen"}, {"timestamps", QJsonObject{{"start", startTime}}}};
+    if (!state.isEmpty()) activity["state"] = state;
+    QJsonObject msg{{"cmd", "SET_ACTIVITY"}, {"nonce", QString::number(QDateTime::currentMSecsSinceEpoch())},
+                    {"args", QJsonObject{{"pid", (qint64)QCoreApplication::applicationPid()}, {"activity", activity}}}};
+    send(1, QJsonDocument(msg).toJson(QJsonDocument::Compact));
+}
+
+void DiscordPresence::checkServer() {
+    if (socket.state() != QLocalSocket::ConnectedState)
+        return;
+    QFile f(serverFile);
+    QString now = f.open(QIODevice::ReadOnly) ? QString::fromUtf8(f.readAll()).trimmed() : QString();
+    if (now != lastServer) {
+        lastServer = now;
+        setActivity();
+    }
+}
+
+void DiscordPresence::start(const QString& dataDir) {
     // shortcut: the application ID is fixed at build time, override with the "discordAppId" setting for testing
     QString appId = QSettings().value("discordAppId", LUMEN_DISCORD_APP_ID).toString();
     if (appId.isEmpty() || !QSettings().value("discordPresence", true).toBool())
@@ -41,16 +71,19 @@ void DiscordPresence::start() {
                 continue;
             }
             socket.readAll();
-            QJsonObject activity{{"details", "Playing Lumen"}, {"timestamps", QJsonObject{{"start", QDateTime::currentSecsSinceEpoch()}}}};
-            QJsonObject msg{{"cmd", "SET_ACTIVITY"}, {"nonce", QString::number(QDateTime::currentMSecsSinceEpoch())},
-                            {"args", QJsonObject{{"pid", (qint64)QCoreApplication::applicationPid()}, {"activity", activity}}}};
-            send(1, QJsonDocument(msg).toJson(QJsonDocument::Compact));
+            startTime = QDateTime::currentSecsSinceEpoch();
+            serverFile = dataDir + "/lumen_server.txt";
+            QFile::remove(serverFile); // a stale file from a crashed run
+            lastServer.clear();
+            setActivity();
+            poll.start();
             return;
         }
     }
 }
 
 void DiscordPresence::stop() {
+    poll.stop();
     if (socket.state() != QLocalSocket::UnconnectedState)
         socket.abort();
 }

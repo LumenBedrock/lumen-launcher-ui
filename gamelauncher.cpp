@@ -214,7 +214,7 @@ void GameLauncher::start(bool disableGameLog, QString arch, bool hasVerifiedLice
                     executable = customExecutable;
                 }
                 process->start(executable, args);
-                m_presence.start();
+                m_presence.start(m_profile != nullptr && m_profile->dataDirCustom ? m_profile->dataDir : QDir(QString::fromStdString(PathHelper::getPrimaryDataDirectory())).canonicalPath());
                 emit stateChanged();
                 emit logAppended(QString::fromStdString(getCommandLine(executable)) + "\n");
                 return;
