@@ -70,6 +70,14 @@ ColumnLayout {
         Layout.fillWidth: true
     }
 
+    Text {
+        text: qsTr("Lumen was made with the help of AI tools.")
+        color: "#fff"
+        wrapMode: Text.WordWrap
+        font.pointSize: 10
+        Layout.fillWidth: true
+    }
+
     HorizontalDivider {}
 
     RowLayout {
