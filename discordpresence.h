@@ -13,10 +13,12 @@ class DiscordPresence : public QObject {
     QTimer poll;
     QString serverFile, lastServer;
     qint64 startTime = 0;
+    int idleTicks = 0; // poll ticks since the last connect attempt
 
     bool send(int opcode, const QByteArray& json);
     void setActivity();
     void checkServer();
+    bool connectOnce();
 
 public:
     explicit DiscordPresence(QObject* parent = nullptr);

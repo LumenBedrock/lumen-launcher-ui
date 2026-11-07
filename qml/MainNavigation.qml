@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import QtQuick.Controls
 import QtQuick.Effects
 import "Components"
+import io.mrarm.mcpelauncher 1.0
 
 // Page frame: the navigation of the active launcher design (window.lumenTheme) plus the page stack
 Item {
@@ -11,6 +12,8 @@ Item {
     property string serversFocus: "" // server card to open when the Servers page is shown
     readonly property bool joinSignedIn: googleLoginHelperInstance.account != null || googleLoginHelperInstance.hasEncryptedCredentials
     property bool useWideLayout: window.width > 720
+    LumenBeta { id: lumenBeta; Component.onCompleted: refresh() }
+    LumenBeta { id: lumenLauncherBeta; kind: "launcher"; Component.onCompleted: refresh() }
     readonly property var pages: [
         { label: qsTr("Home"), index: 0, icon: "qrc:/Resources/lumen-nav-home.svg" },
         { label: qsTr("Servers"), index: 7, icon: "qrc:/Resources/lumen-nav-servers.svg" },
@@ -18,7 +21,7 @@ Item {
         { label: qsTr("Versions"), index: 6, icon: "qrc:/Resources/lumen-nav-versions.svg" },
         { label: qsTr("Game Log"), index: 3, icon: "qrc:/Resources/lumen-nav-log.svg" },
         { label: qsTr("Settings"), index: 4, icon: "qrc:/Resources/lumen-nav-settings.svg" }
-    ]
+    ].concat(lumenBeta.capable ? [{ label: qsTr("Beta"), index: 9, icon: "qrc:/Resources/lumen-nav-versions.svg" }] : [])
 
     Loader {
         id: nav
@@ -99,6 +102,11 @@ Item {
     }
 
     Component {
+        id: betaPage
+        BetaScreen { clientBeta: lumenBeta; launcherBeta: lumenLauncherBeta }
+    }
+
+    Component {
         id: versionsPage
         VersionsScreen {}
     }
@@ -153,7 +161,7 @@ Item {
         if (index === currentIndex)
             return
 
-        const page = ({ 6: versionsPage, 7: serversPage, 8: quickJoinPage, 3: gameLogPage, 4: launcherSettingsPage })[index]
+        const page = ({ 6: versionsPage, 7: serversPage, 8: quickJoinPage, 9: betaPage, 3: gameLogPage, 4: launcherSettingsPage })[index]
         if (!page)
             mainStackView.pop(null)                                   // back home
         else if (mainStackView.depth > 1)
