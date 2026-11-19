@@ -474,6 +474,127 @@ Window {
         errorDialog.open()
     }
 
+    // Drag and drop: texture packs, skin packs, skins (+ cape, custom model) are installed straight into the game data folder
+    Settings {
+        id: importSettings
+        category: "LumenImport"
+        property bool activate: true   // put dropped texture packs on top of the active ones
+    }
+    property alias lumenActivateDrops: importSettings.activate
+    signal packsImported()
+    LumenPackPort { id: packPortInstance; Component.onCompleted: refresh() }
+    property var packPort: packPortInstance
+    property var importResults: []
+
+    LumenImport {
+        id: lumenImport
+        dataDir: launcherSettings.gameDataDir
+        onFinished: function (results) {
+            window.importResults = results
+            importToastTimer.restart()
+            window.packsImported()
+        }
+    }
+
+    // Dropped texture pack: port it (tokens) or just install it
+    Popup {
+        id: portAsk
+        property var urls: []
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        width: Math.min(window.width - 32, 520)
+        padding: 16
+        modal: true
+        closePolicy: Popup.CloseOnEscape
+        background: Rectangle { color: window.lumenSurfaceHigh; radius: 8 }
+        Overlay.modal: Rectangle { color: "#8f181818" }
+        readonly property bool canPort: packPortInstance.linked && packPortInstance.allowed && packPortInstance.balance >= packPortInstance.cost && !packPortInstance.busy
+        contentItem: Column {
+            spacing: 12
+            MText { width: parent.width; wrapMode: Text.WordWrap; text: qsTr("Does this pack need to be ported, or just installed?") }
+            MText {
+                width: parent.width
+                wrapMode: Text.WordWrap
+                opacity: 0.75
+                text: !packPortInstance.linked ? qsTr("Log in with Discord on the Pack porting page to port packs.")
+                    : !packPortInstance.allowed ? qsTr("Your rank can't use pack porting.")
+                    : packPortInstance.balance < packPortInstance.cost ? qsTr("Not enough tokens (%1 of %2). Next refill: %3").arg(packPortInstance.balance).arg(packPortInstance.cost).arg(packPortInstance.nextRefill)
+                    : qsTr("Porting costs %1 tokens. You have %2.").arg(packPortInstance.cost).arg(packPortInstance.balance)
+            }
+            Row {
+                spacing: 8
+                MButton {
+                    text: qsTr("Port this pack")
+                    enabled: portAsk.canPort
+                    onClicked: { packPortInstance.port(portAsk.urls[0].toString()); portAsk.close() }
+                }
+                MButton {
+                    text: qsTr("Just install")
+                    onClicked: { lumenImport.importUrls(portAsk.urls, importSettings.activate, gameLauncher.running); portAsk.close() }
+                }
+                MButton { text: qsTr("Cancel"); onClicked: portAsk.close() }
+            }
+        }
+    }
+    Timer { id: importToastTimer; interval: 12000; onTriggered: window.importResults = [] }
+    function showImportResults() { importToastTimer.restart() }
+
+    // a single texture pack (.zip/.mcpack or a folder): offer porting; everything else (.mcaddon, several files) installs as before
+    function handleDrop(urls) {
+        if (urls.length === 0) return
+        if (urls.length === 1 && (/\.(zip|mcpack)$/i.test(urls[0].toString()) || packPortInstance.isDir(urls[0]))) { portAsk.urls = urls; portAsk.open(); packPortInstance.refresh() }
+        else lumenImport.importUrls(urls, importSettings.activate, gameLauncher.running)
+    }
+    DropArea {
+        id: dropArea
+        anchors.fill: parent
+        z: 1000
+        keys: ["text/uri-list"]
+        onDropped: function (drop) {
+            window.handleDrop(drop.urls)
+            drop.accept()
+        }
+        Rectangle {
+            anchors.fill: parent
+            visible: dropArea.containsDrag || lumenImport.busy
+            color: "#cc0d0a1c"
+            border.width: 3
+            border.color: "#9b80ff"
+            Text {
+                anchors.centerIn: parent
+                color: "white"
+                font.pixelSize: 22
+                text: lumenImport.busy ? qsTr("Installing...") : qsTr("Drop texture packs or skins")
+            }
+        }
+    }
+
+    Column {
+        z: 1001
+        anchors.bottom: parent.bottom
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottomMargin: 16
+        spacing: 6
+        width: Math.min(parent.width - 32, 640)
+        Repeater {
+            model: window.importResults
+            Rectangle {
+                width: parent.width
+                height: msg.implicitHeight + 16
+                radius: 8
+                color: modelData.ok ? "#cc1f5a35" : "#cc6a2020"
+                Text {
+                    id: msg
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    color: "white"
+                    wrapMode: Text.Wrap
+                    text: modelData.file + ": " + modelData.message
+                }
+            }
+        }
+    }
+
     function getCurrentGameDataDir() {
         if (window.currentGameDataDir && window.currentGameDataDir.length > 0) {
             return window.currentGameDataDir

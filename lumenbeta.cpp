@@ -238,7 +238,7 @@ void LumenBeta::applyAndRestart() {
     // the staged bundle (or the stable launcher from the lumen-launcher remote), record the result, start the launcher again. A bundle that does not
     // install falls back to the stable launcher so nobody is left without one.
     const QString script = QString(
-        "APP=%1; B='%2'; R='%3'; MODE=%4\n"
+        "APP=\"$1\"; B=\"$2\"; R=\"$3\"; MODE=\"$4\"\n" // paths as arguments, never pasted into the script (a ' in $HOME broke it)
         "for i in $(seq 1 120); do flatpak ps --columns=application 2>/dev/null | grep -qx \"$APP\" || break; sleep 1; done\n"
         "if flatpak ps --columns=application 2>/dev/null | grep -qx \"$APP\"; then echo 'failed running' > \"$R\"; exec flatpak run \"$APP\"; fi\n"
         "# a system-wide stable launcher stays (no sudo): the beta is a user install that shadows it, and \"stable\" just removes the user copy\n"
@@ -252,8 +252,8 @@ void LumenBeta::applyAndRestart() {
         "elif stable_back; then echo 'failed stable-restored' > \"$R\"; clean\n"
         "else echo 'failed no-launcher' > \"$R\"; fi\n"
         "rm -f \"$B\"\n"
-        "exec flatpak run \"$APP\"\n").arg(kApp, bundleFile(), resultFile(), m_pending);
-    QProcess::startDetached("flatpak-spawn", {"--host", "setsid", "-f", "bash", "-c", script});
+        "exec flatpak run \"$APP\"\n");
+    QProcess::startDetached("flatpak-spawn", {"--host", "setsid", "-f", "bash", "-c", script, "lumen-swap", kApp, bundleFile(), resultFile(), m_pending});
     QCoreApplication::quit();
 }
 

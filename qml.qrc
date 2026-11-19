@@ -20,6 +20,7 @@
         <file>qml/VersionsScreen.qml</file>
         <file>qml/ServersScreen.qml</file>
         <file>qml/BetaScreen.qml</file>
+        <file>qml/PackPortScreen.qml</file>
         <file>qml/QuickJoinScreen.qml</file>
         <file>qml/PackEditor.qml</file>
         <file>qml/NewsScreen.qml</file>

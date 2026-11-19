@@ -32,6 +32,10 @@ ColumnLayout {
         id: store
         dataDir: launcherSettings.gameDataDir
     }
+    Connections {
+        target: window
+        function onPacksImported() { store.reload() }
+    }
 
     BaseHeader {
         title: qsTr("Servers")

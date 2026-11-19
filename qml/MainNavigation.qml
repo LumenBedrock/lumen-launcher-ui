@@ -21,7 +21,8 @@ Item {
         { label: qsTr("Versions"), index: 6, icon: "qrc:/Resources/lumen-nav-versions.svg" },
         { label: qsTr("Game Log"), index: 3, icon: "qrc:/Resources/lumen-nav-log.svg" },
         { label: qsTr("Settings"), index: 4, icon: "qrc:/Resources/lumen-nav-settings.svg" }
-    ].concat(lumenBeta.capable ? [{ label: qsTr("Beta"), index: 9, icon: "qrc:/Resources/lumen-nav-versions.svg" }] : [])
+    ].concat(!window.packPort.linked || window.packPort.allowed ? [{ label: qsTr("Pack porting"), index: 10, icon: "qrc:/Resources/lumen-nav-versions.svg" }] : []) // below Settings, above Beta; rank decides (Worker's "allowed")
+     .concat(lumenBeta.capable ? [{ label: qsTr("Beta"), index: 9, icon: "qrc:/Resources/lumen-nav-versions.svg" }] : [])
 
     Loader {
         id: nav
@@ -107,6 +108,11 @@ Item {
     }
 
     Component {
+        id: packPortPage
+        PackPortScreen {}
+    }
+
+    Component {
         id: versionsPage
         VersionsScreen {}
     }
@@ -161,7 +167,7 @@ Item {
         if (index === currentIndex)
             return
 
-        const page = ({ 6: versionsPage, 7: serversPage, 8: quickJoinPage, 9: betaPage, 3: gameLogPage, 4: launcherSettingsPage })[index]
+        const page = ({ 6: versionsPage, 7: serversPage, 8: quickJoinPage, 9: betaPage, 10: packPortPage, 3: gameLogPage, 4: launcherSettingsPage })[index]
         if (!page)
             mainStackView.pop(null)                                   // back home
         else if (mainStackView.depth > 1)

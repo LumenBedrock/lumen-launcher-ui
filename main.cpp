@@ -19,7 +19,9 @@
 #include "lumenconfig.h"
 #include "lumenupdater.h"
 #include "lumenbeta.h"
+#include "lumenpackport.h"
 #include "lumenprofiles.h"
+#include "lumenimport.h"
 #include "zipextractiontask.h"
 #include "downloadtask.h"
 
@@ -169,7 +171,9 @@ int main(int argc, char *argv[])
     qmlRegisterType<LumenConfig>("io.mrarm.mcpelauncher", 1, 0, "LumenConfig");
     qmlRegisterType<LumenUpdater>("io.mrarm.mcpelauncher", 1, 0, "LumenUpdater");
     qmlRegisterType<LumenBeta>("io.mrarm.mcpelauncher", 1, 0, "LumenBeta");
+    qmlRegisterType<LumenPackPort>("io.mrarm.mcpelauncher", 1, 0, "LumenPackPort");
     qmlRegisterType<LumenProfiles>("io.mrarm.mcpelauncher", 1, 0, "LumenProfiles");
+    qmlRegisterType<LumenImport>("io.mrarm.mcpelauncher", 1, 0, "LumenImport");
     qmlRegisterType<ZipExtractionTask>("io.mrarm.mcpelauncher", 1, 0, "ZipExtractionTask");
     qmlRegisterType<DownloadTask>("io.mrarm.mcpelauncher", 1, 0, "DownloadTask");
     qmlRegisterType<DownloadDataWrapper>("io.mrarm.mcpelauncher", 1, 0, "DownloadDataWrapper");

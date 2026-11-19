@@ -7,6 +7,7 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QRegularExpression>
+#include <QTemporaryDir>
 #include <cstdio>
 
 static const char *const kApp = "io.github.LumenBedrock.LumenLauncher";
@@ -108,6 +109,7 @@ void LumenUpdater::startAppImage(const QString &assetUrl) {
         startScript();
         return;
     }
+    m_assetUrl = assetUrl;
     m_tmpPath = m_appImagePath + ".lumen-update";
     m_file = new QFile(m_tmpPath, this);
     if (!m_file->open(QIODevice::WriteOnly)) {
@@ -154,6 +156,44 @@ void LumenUpdater::onAppImageFinished() {
         fail(tr("The downloaded file is not a valid AppImage. The current one was not changed."));
         return;
     }
+    // the release carries <asset>.sig, a detached signature by the Lumen release key (the same key the Flatpak repo and the beta use)
+    m_status = tr("Checking the signature...");
+    emit stateChanged();
+    QNetworkRequest req{QUrl(m_assetUrl + ".sig")};
+    req.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
+    QNetworkReply *sr = m_net.get(req);
+    connect(sr, &QNetworkReply::finished, this, [this, sr]() { onSigFinished(sr); });
+}
+
+void LumenUpdater::onSigFinished(QNetworkReply *r) {
+    r->deleteLater();
+    const QByteArray sig = r->error() == QNetworkReply::NoError ? r->read(64 * 1024) : QByteArray();
+    // key shipped inside this AppImage, so a tampered release can't bring its own
+    const QString key = qEnvironmentVariable("APPDIR") + "/usr/share/lumen/lumen-public.gpg";
+    QTemporaryDir tmp;
+    QString why;
+    if (sig.isEmpty()) why = tr("its signature could not be downloaded");
+    else if (!QFile::exists(key) || !tmp.isValid()) why = tr("the release key is missing");
+    else {
+        QFile sf(tmp.filePath("a.sig"));
+        if (!sf.open(QIODevice::WriteOnly) || sf.write(sig) != sig.size()) why = tr("cannot write a temporary file");
+        sf.close();
+        if (why.isEmpty()) {
+            QProcess gpgv;
+            gpgv.start("gpgv", {"--homedir", tmp.path(), "--keyring", key, sf.fileName(), m_tmpPath});
+            if (!gpgv.waitForFinished(60000)) why = gpgv.error() == QProcess::FailedToStart ? tr("gpgv is not installed") : tr("the signature check timed out");
+            else if (gpgv.exitStatus() != QProcess::NormalExit || gpgv.exitCode() != 0) why = tr("its signature is not valid");
+        }
+    }
+    if (!why.isEmpty()) {
+        QFile::remove(m_tmpPath);
+        fail(tr("The new AppImage was not installed: %1. The current one was not changed.\nYou can also run this in a terminal:\n%2").arg(why, manualCommand()));
+        return;
+    }
+    installAppImage();
+}
+
+void LumenUpdater::installAppImage() {
     QFile::setPermissions(m_tmpPath, QFile::permissions(m_appImagePath) | QFileDevice::ExeOwner | QFileDevice::ExeUser);
     // renaming over the running file is safe on Linux; the running copy keeps its old inode until it exits
     if (::rename(QFile::encodeName(m_tmpPath), QFile::encodeName(m_appImagePath)) != 0) {

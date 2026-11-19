@@ -15,6 +15,12 @@ ColumnLayout {
         onClicked: filePicker.open()
     }
 
+    MCheckBox {
+        text: qsTr("Turn on dropped texture packs (drag a pack onto the launcher)")
+        checked: window.lumenActivateDrops
+        onToggled: window.lumenActivateDrops = checked
+    }
+
     FileDialog {
         id: filePicker
         title: "Please pick the Minecraft file"

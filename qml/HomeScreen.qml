@@ -57,6 +57,10 @@ BaseScreen {
         id: lumenProfiles
         dataDir: launcherSettings.gameDataDir
     }
+    Connections {
+        target: window
+        function onPacksImported() { lumenProfiles.reload() }
+    }
     // [{name, host, port}] from the profiles' hosts ("https://eu.example.net:19132, other" -> eu.example.net, 19132)
     property var lumenServers: lumenProfiles.profiles.map(function (p) {
         const raw = String(p.hosts || "").split(",")[0].trim().replace(/^\w+:\/\//, "").replace(/\/.*$/, "")

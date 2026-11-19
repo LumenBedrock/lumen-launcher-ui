@@ -46,6 +46,8 @@ private:
     void startAppImage(const QString &assetUrl);
     void fail(const QString &error);
     void onAppImageFinished();
+    void onSigFinished(QNetworkReply *r);
+    void installAppImage();
 
     QString m_mode;
     bool m_running = false;
@@ -60,4 +62,5 @@ private:
     QFile *m_file = nullptr;
     QString m_appImagePath;
     QString m_tmpPath;
+    QString m_assetUrl;
 };
