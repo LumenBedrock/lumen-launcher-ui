@@ -83,7 +83,7 @@ void LumenPackPort::apply(const QJsonObject &o) {
 
 void LumenPackPort::refresh() {
     if (!linked()) { emit stateChanged(); return; }
-    QNetworkRequest req{QUrl(kBase + "/pack/balance?hw=" + hwid())};
+    QNetworkRequest req{QUrl(kBase + "/pack/balance")}; // the hashed machine id goes only with an actual port
     req.setRawHeader("Authorization", "Bearer " + token());
     QNetworkReply *r = m_net.get(req);
     connect(r, &QNetworkReply::finished, this, [this, r]() {

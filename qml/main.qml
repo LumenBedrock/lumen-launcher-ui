@@ -539,10 +539,10 @@ Window {
     Timer { id: importToastTimer; interval: 12000; onTriggered: window.importResults = [] }
     function showImportResults() { importToastTimer.restart() }
 
-    // a single texture pack (.zip/.mcpack or a folder): offer porting; everything else (.mcaddon, several files) installs as before
+    // a single texture pack (.zip/.mcpack or a folder): offer porting (only to accounts the Worker allows, the feature is unfinished); everything else (.mcaddon, several files) installs as before
     function handleDrop(urls) {
         if (urls.length === 0) return
-        if (urls.length === 1 && (/\.(zip|mcpack)$/i.test(urls[0].toString()) || packPortInstance.isDir(urls[0]))) { portAsk.urls = urls; portAsk.open(); packPortInstance.refresh() }
+        if (urls.length === 1 && packPortInstance.linked && packPortInstance.allowed && (/\.(zip|mcpack)$/i.test(urls[0].toString()) || packPortInstance.isDir(urls[0]))) { portAsk.urls = urls; portAsk.open(); packPortInstance.refresh() }
         else lumenImport.importUrls(urls, importSettings.activate, gameLauncher.running)
     }
     DropArea {
