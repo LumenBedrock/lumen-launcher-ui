@@ -21,7 +21,7 @@ Item {
         { label: qsTr("Versions"), index: 6, icon: "qrc:/Resources/lumen-nav-versions.svg" },
         { label: qsTr("Game Log"), index: 3, icon: "qrc:/Resources/lumen-nav-log.svg" },
         { label: qsTr("Settings"), index: 4, icon: "qrc:/Resources/lumen-nav-settings.svg" }
-    ].concat(!window.packPort.linked || window.packPort.allowed ? [{ label: qsTr("Pack porting"), index: 10, icon: "qrc:/Resources/lumen-nav-versions.svg" }] : []) // below Settings, above Beta; rank decides (Worker's "allowed")
+    ].concat(window.packPort.linked && window.packPort.allowed ? [{ label: qsTr("Pack porting"), index: 10, icon: "qrc:/Resources/lumen-nav-versions.svg" }] : []) // below Settings, above Beta; hidden until the Worker allows this account (unfinished: the pack file is not uploaded yet)
      .concat(lumenBeta.capable ? [{ label: qsTr("Beta"), index: 9, icon: "qrc:/Resources/lumen-nav-versions.svg" }] : [])
 
     Loader {

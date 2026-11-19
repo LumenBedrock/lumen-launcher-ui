@@ -42,7 +42,7 @@ public:
     Q_INVOKABLE bool isDir(const QUrl &url); // a dropped local folder
     Q_INVOKABLE void login();   // Discord login in the browser, then polls for the token
     Q_INVOKABLE void logout();  // removes the local token file (the in-game link on the server is untouched)
-    // Ports the pack file at `path` (a local path). TODO(pleeder's API): the file itself is not uploaded yet, only its name/size/sha256 go into the signed job.
+    // Ports the pack file at `path` (a local path). TODO: the file itself is not uploaded yet, only its name/size/sha256 go into the signed job.
     Q_INVOKABLE void port(const QString &pathOrUrl);
 
 signals:
